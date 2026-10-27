@@ -1,0 +1,1998 @@
+@charset "UTF-8";
+
+/* ==========================================
+   1. リセット & ベース設定
+   ========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  font-family: "Shippori Mincho", "游明朝", serif;
+  color: #2b2b2b;
+  background-color: #faf9f6;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: bottom;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   2. オープニング
+   ========================================== */
+.opening {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: #1a1a1a;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.opening-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  letter-spacing: 0.3em;
+  animation: pulseLogo 1.2s ease-in-out infinite alternate;
+}
+
+.opening.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@keyframes pulseLogo {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* ==========================================
+   3. 固定予約ボタン（右下）
+   ========================================== */
+.fixed-reserve-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.fixed-reserve-btn:hover {
+  transform: translateY(-4px);
+  background-color: #b39b72;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.fixed-reserve-btn .btn-en {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.fixed-reserve-btn .btn-ja {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+/* ==========================================
+   4. ヘッダー & ナビゲーション
+   ========================================== */
+.header {
+  padding: 20px 40px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.site-title a {
+  font-family: 'Cinzel', serif;
+  font-size: 1.8rem;
+  letter-spacing: 0.2em;
+  color: #1a1a1a;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px 20px;
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: inline-block;
+  white-space: nowrap;
+  transition: color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.site-title a:hover {
+  color: #b39b72;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.nav ul {
+  display: flex;
+  list-style: none;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 6px 16px;
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav-anchor {
+  display: inline-block;
+  padding: 4px 10px;
+  color: #2b2b2b;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.nav-anchor:hover {
+  color: #b39b72;
+  transform: translateY(-2px);
+}
+
+.nav-btn-main {
+  display: inline-block;
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 6px 18px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.nav-btn-main:hover {
+  background-color: #b39b72;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(179, 155, 114, 0.4);
+}
+
+/* ==========================================
+   5. メインビジュアル
+   ========================================== */
+.hero {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  background-color: #faf9f6;
+  overflow: hidden;
+  padding-top: 80px;
+}
+
+.hero-text-wrap {
+  position: relative;
+  z-index: 2;
+  width: 30%;
+  padding-left: 5%;
+  padding-right: 20px;
+}
+
+.hero-catch {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: clamp(12px, 2vw, 22px);
+  color: #1a1a1a;
+}
+
+.hero-sub {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  color: #b39b72;
+  font-weight: 600;
+}
+
+.carousel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 70%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.carousel-slides {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  line-height: 40px;
+  color: #1a1a1a;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.carousel-arrow:hover {
+  background: rgba(255, 255, 255, 1);
+  color: #b39b72;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.carousel-arrow.prev { left: 20px; }
+.carousel-arrow.next { right: 20px; }
+
+.carousel-dots {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.6);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  width: 24px;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+/* ==========================================
+   6. 共通セクション設定 & フェードイン
+   ========================================== */
+.section { padding: 100px 0; }
+
+.section-en {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  color: #b39b72;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 40px;
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================
+   7. CONCEPT
+   ========================================== */
+.concept-section {
+  padding: 100px 0;
+  border-top: 1px solid #eae5dc;
+  background-color: #faf9f6;
+}
+
+.concept-container {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 50px;
+}
+
+/* 左側のテキストエリア */
+.concept-content-card {
+  width: 45%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 420px;
+}
+
+.concept-image-wrap {
+  width: 52%;
+  flex-shrink: 0;
+}
+
+.concept-image-sp {
+  display: none;
+}
+.concept-image-pc {
+  display: block;
+}
+
+.concept-img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* タイトルエリア（CONCEPTの文字と「素材の美しさ〜」の間隔） */
+.concept-title {
+  margin-top: 8px !important;    /* CONCEPTの文字との間隔 */
+  margin-bottom: 0 !important;  /* タイトルの下の余白は一度リセット */
+  text-align: center !important;
+}
+
+.concept-title,
+.concept-title * {
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #1a1a1a;
+  text-align: center !important;
+}
+
+.concept-title p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ★ 本文エリア（「素材の美しさ〜」と「HAIR SALON LUMIÈRE〜」の間の余白設定） */
+.concept-text {
+  font-size: 0.92rem;
+  line-height: 2.0;
+  color: #333333;
+  margin-top: 28px !important; /* ← ここで「素材の美しさ〜」との隙間を広げています！ */
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.concept-text p {
+  margin: 0 0 1em 0;
+  line-height: inherit;
+  font-size: inherit;
+}
+
+.concept-text p:last-child {
+  margin-bottom: 0;
+}
+
+./* 6行まで表示し、それ以上あふれた場合のみ「…」で省略 */
+.concept-text-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6; /* ← 4から6に変更 */
+  overflow: hidden;
+  max-height: 12em;       /* ← 8emから12emに変更（2.0 line-height × 6行分） */
+}
+}
+
+/* ボタンエリア */
+.concept-btn-wrap {
+  text-align: center;
+  margin-top: auto;
+}
+
+.concept-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.concept-more-btn .btn-text-en {
+  font-family: 'Cinzel', serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.15em;
+}
+
+.concept-more-btn .btn-text-ja {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.concept-more-btn .arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.concept-more-btn:hover {
+  background-color: #b39b72;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(179, 155, 114, 0.35);
+}
+
+.concept-more-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* ==========================================
+   8. STAFF
+   ========================================== */
+.staff-section {
+  padding: 100px 0;
+  border-top: 1px solid #eae5dc;
+  background-color: #faf9f6;
+  text-align: center; /* 💡【追加】スタッフエリア全体を中央寄せにします */
+}
+
+.staff-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+}
+
+.staff-content-card {
+  width: 45%;
+  text-align: center; /* 💡【追加】左側のテキストカード内をすべて中央寄せにします */
+}
+
+.staff-title {
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #1a1a1a;
+  margin-bottom: 24px;
+  text-align: center; /* 💡【追加】タイトルも確実に中央寄せ */
+}
+
+.staff-text {
+  font-size: 0.92rem;
+  line-height: 2.0;
+  color: #333333;
+  margin-bottom: 32px;
+  text-align: center; /* 💡【追加】紹介文も中央寄せ */
+}
+
+.staff-image-wrap {
+  width: 52%;
+  flex-shrink: 0;
+}
+
+.staff-img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.staff-btn-wrap {
+  text-align: center; /* 💡【追加】ボタンを中央寄せにします */
+}
+
+.staff-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.staff-more-btn .btn-text-en {
+  font-family: 'Cinzel', serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.15em;
+}
+
+.staff-more-btn .btn-text-ja {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.staff-more-btn .arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.staff-more-btn:hover {
+  background-color: #b39b72;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(179, 155, 114, 0.35);
+}
+
+.staff-more-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* ==========================================
+   9. GALLERY
+   ========================================== */
+.gallery-section {
+  padding: 100px 0;
+  border-top: 1px solid #eae5dc;
+  background-color: #faf9f6;
+  text-align: center; /* ★ この行を追加（エリア全体のテキストを中央寄せ） */
+}
+
+.gallery-lead {
+  font-size: 0.85rem;
+  color: #777;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.gallery-card {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.gallery-img-box {
+  position: relative;
+  height: 320px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.gallery-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.angle-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(26, 26, 26, 0.75);
+  color: #ffffff;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.gallery-info {
+  padding: 16px 20px;
+  text-align: center; /* ★ カード内のテキストを中央寄せ */
+}
+
+.style-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.style-menu {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.gallery-btn-wrap {
+  text-align: center;
+}
+
+.gallery-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 28px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.gallery-more-btn .btn-text-en {
+  font-family: 'Cinzel', serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.15em;
+}
+
+.gallery-more-btn .btn-text-ja {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.gallery-more-btn .arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.gallery-more-btn:hover {
+  background-color: #b39b72;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(179, 155, 114, 0.35);
+}
+
+.gallery-more-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* ==========================================
+   10. MENU
+   ========================================== */
+.menu-section {
+  padding: 100px 0;
+  border-top: 1px solid #eae5dc;
+  background-color: #faf9f6;
+}
+
+.menu-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+}
+
+.menu-content-card {
+  width: 52%;
+}
+
+.menu-title {
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #1a1a1a;
+  margin-bottom: 12px;
+}
+
+.menu-lead {
+  font-size: 0.85rem;
+  color: #666666;
+  margin-bottom: 30px;
+}
+
+.menu-group {
+  margin-bottom: 35px;
+}
+
+.menu-row {
+  display: flex;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px dashed #e0dcd5;
+}
+
+.menu-name {
+  font-size: 0.92rem;
+  color: #2b2b2b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.menu-dots {
+  flex-grow: 1;
+}
+
+.menu-price {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  margin-left: 15px;
+}
+
+.menu-image-wrap {
+  width: 42%;
+  flex-shrink: 0;
+}
+
+.menu-img {
+  width: 100%;
+  height: 440px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.menu-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.menu-more-btn .btn-text-en {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+}
+
+.menu-more-btn .btn-text-ja {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.menu-more-btn .arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.menu-more-btn:hover {
+  background-color: #b39b72;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(179, 155, 114, 0.35);
+}
+
+.menu-more-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* ==========================================
+   11. NEWS
+   ========================================== */
+.news-section {
+  padding: 100px 0;
+  border-top: 1px solid #eae5dc;
+  background-color: #faf9f6;
+  text-align: center; /* ★ この行を追加（エリア全体のテキストを中央寄せ） */
+}
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.news-item {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.news-thumb {
+  width: 100px;
+  height: 75px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.news-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.news-item:hover .news-thumb img {
+  transform: scale(1.08);
+}
+
+.news-content {
+  flex-grow: 1;
+}
+
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 6px;
+}
+
+.news-date {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: #888888;
+}
+
+.news-category {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: #b39b72;
+  background-color: #faf7f2;
+  border: 1px solid #eae2d5;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.news-text {
+  font-size: 0.92rem;
+  color: #2b2b2b;
+  line-height: 1.6;
+  transition: color 0.3s ease;
+}
+
+.news-item:hover .news-text {
+  color: #b39b72;
+}
+
+.news-btn-wrap {
+  text-align: center;
+}
+
+.news-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 28px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.news-more-btn .btn-text-en {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+}
+
+.news-more-btn .btn-text-ja {
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.news-more-btn .arrow {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.news-more-btn:hover {
+  background-color: #b39b72;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(179, 155, 114, 0.35);
+}
+
+.news-more-btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* ==========================================
+   12. RESERVATION
+   ========================================== */
+.reservation-section {
+  padding: 100px 0;
+  border-top: 1px solid #eae5dc;
+  background-color: #faf9f6;
+  text-align: center;
+}
+
+.reservation-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.reservation-lead {
+  font-size: 0.92rem;
+  line-height: 2.0;
+  color: #333333;
+  margin-bottom: 40px;
+}
+
+.reserve-btn-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.reserve-btn {
+  flex: 1;
+  min-width: 260px;
+  max-width: 340px;
+  padding: 16px 24px;
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.reserve-btn .btn-sub {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  margin-bottom: 2px;
+  letter-spacing: 0.05em;
+}
+
+.reserve-btn .btn-main {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.reserve-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(179, 155, 114, 0.3);
+}
+
+.web-btn {
+  background-color: #e07a8e; /* 上品なピンク色 */
+  color: #ffffff;
+}
+
+.web-btn:hover {
+  background-color: #cc657a; /* ホバー時の少し濃いピンク */
+}
+
+.line-btn {
+  background-color: #06c755;
+  color: #ffffff;
+}
+
+.line-btn:hover {
+  background-color: #05b34c;
+}
+
+.reservation-tel-info {
+  font-size: 0.88rem;
+  color: #666666;
+}
+
+.reservation-tel-info .tel-link {
+  color: #1a1a1a;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.reservation-tel-info .tel-link:hover {
+  color: #b39b72;
+}
+
+/* ==========================================
+   13. ACCESS & CALENDAR
+   ========================================== */
+.access-section {
+  padding: 90px 0;
+  background-color: #fcfbf9;
+}
+
+.access-info-top {
+  background: #fff;
+  padding: 30px 35px;
+  border-radius: 8px;
+  border: 1px solid #eae5dc;
+  margin-bottom: 35px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.access-info-top .shop-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.1em;
+  color: #1a1a1a;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0ece1;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 30px;
+}
+
+.info-item {
+  font-size: 0.88rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+.info-item.full-width {
+  grid-column: span 2;
+}
+
+.info-item span {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b39b72;
+  width: 80px;
+}
+
+.info-item a {
+  color: #444;
+  text-decoration: none;
+}
+
+.access-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: stretch;
+}
+
+.map-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.map-container {
+  flex: 1;
+  min-height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eae5dc;
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  border: 0;
+}
+
+.map-link-wrap {
+  margin-top: 10px;
+  text-align: right;
+}
+
+.map-app-link {
+  font-size: 0.8rem;
+  color: #b39b72;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.map-app-link:hover {
+  color: #1a1a1a;
+}
+
+/* コルクボード & カレンダー スタイル */
+.corkboard-container {
+  position: relative;
+  width: 100%;
+  padding: 24px;
+  background-color: #d2a679;
+  background-image: 
+    radial-gradient(#b88653 15%, transparent 16%),
+    radial-gradient(#a37242 15%, transparent 16%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+  border: 10px solid #8c5a2b;
+  border-radius: 8px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.calendar-paper {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.15);
+  transform: rotate(-0.5deg);
+  box-sizing: border-box;
+}
+
+.calendar-paper::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle at 30% 30%, #ffe066, #d4af37 60%, #aa820a);
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.calendar-brand {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  color: #b39b72;
+  text-align: center;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.calendar-header {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.calendar-month {
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: 0.08em;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.calendar-table th,
+.calendar-table td {
+  padding: 8px 4px;
+  border: 1px solid #f0ece1;
+}
+
+.calendar-table th {
+  font-weight: 600;
+  background-color: #faf9f6;
+  color: #333;
+}
+
+.calendar-table th.sun,
+.calendar-table td.sun {
+  color: #d9534f;
+}
+
+.calendar-table th.sat,
+.calendar-table td.sat {
+  color: #31708f;
+}
+
+/* --- 修正後：上下左右すべての枠線を個別に、かつ明示的に指定 --- */
+.calendar-table td.off {
+  background-color: #fce8e8;
+  color: #d9534f;
+  font-weight: bold;
+  position: relative;
+  box-shadow: inset 0 0 0 1.5px #d9534f;
+}
+
+.calendar-table td.disabled {
+  background-color: #f9f9f9;
+}
+
+.calendar-note {
+  margin-top: 12px;
+  font-size: 0.75rem;
+  color: #666;
+  text-align: right;
+}
+
+.calendar-note .mark-off {
+  color: #d9534f;
+  margin-right: 2px;
+}
+
+/* ==========================================
+   14. トップへ戻るボタン
+   ========================================== */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 44px;
+  height: 44px;
+  background-color: rgba(26, 26, 26, 0.85);
+  color: #b39b72;
+  border: 1px solid #b39b72;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  transition: all 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.scroll-top-btn.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================
+   15. FOOTER
+   ========================================== */
+.footer {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 40px 0 50px;
+  text-align: center;
+}
+
+.footer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+}
+
+.footer-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.15em;
+  color: #b39b72;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.footer-sub {
+  font-size: 0.78rem;
+  color: #999999;
+  letter-spacing: 0.05em;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  list-style: none;
+}
+
+.footer-nav a {
+  color: #cccccc;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  transition: color 0.3s ease;
+}
+
+.footer-nav a:hover {
+  color: #b39b72;
+}
+
+.footer-info {
+  margin: 10px 0;
+  display: inline-block; /* 全体を中央に綺麗に収めるため */
+  text-align: left;
+}
+
+.footer-info-item {
+  display: grid;
+  grid-template-columns: 85px 1fr; /* 左側のラベル幅を85px固定、右側を可変に */
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.footer-info-item span:first-child {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  color: #b39b72;
+}
+
+
+.footer-info {
+  margin: 10px 0;
+  text-align: left;       /* ① 中継ぎとして内部の文字を左揃えにする */
+  display: inline-block;  /* ② ブロック自体の幅を中身の文字数に合わせる */
+  font-size: 0.82rem;
+  color: #a09d98;
+  line-height: 1.8;
+}
+
+.footer-info-item strong {
+  color: #b39b72;
+  font-weight: 600;
+  margin-right: 6px;
+  font-family: 'Cinzel', serif;
+}
+
+.footer-info-item a {
+  color: #a09d98;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-info-item a:hover {
+  color: #fff;
+}
+
+.footer-sns {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-sns a {
+  color: #ffffff;
+  font-size: 0.82rem;
+  border: 1px solid #444444;
+  padding: 6px 16px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.footer-sns a:hover {
+  border-color: #b39b72;
+  color: #b39b72;
+}
+
+.copyright {
+  font-size: 0.72rem;
+  color: #666666;
+  margin-top: 10px;
+}
+
+.reserve-btn:active,
+.footer-nav a:active,
+.map-app-link:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+  color: #b39b72;
+}
+
+/* ==========================================
+   16. タブレット・中間画面レスポンシブ（769px〜1024px）
+   ========================================== */
+@media (max-width: 1024px) {
+  .header {
+    padding: 15px 20px;
+  }
+  
+  .header-inner {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+
+  .nav ul {
+    gap: 8px 10px;
+    padding: 6px 12px;
+    justify-content: center;
+  }
+
+  .nav-anchor {
+    font-size: 0.78rem;
+    padding: 3px 6px;
+  }
+
+  /* 💡【修正】ここにあった .hero / .hero-text-wrap / .hero-catch / .carousel の指定を丸ごと削除しました。
+     これにより、1024px以下になっても縦並びにならず、横並びが維持されます。 */
+
+/* メインビジュアル：タブレット・狭い画面でも横並び */
+  .hero {
+    min-height: 65vh;
+  }
+
+  .hero-text-wrap {
+    width: 34%;
+    padding-left: 3%;
+    padding-right: 12px;
+  }
+
+  .hero-catch {
+    font-size: clamp(1.2rem, 2.2vw, 1.7rem);
+  }
+
+  .hero-sub {
+    font-size: clamp(0.6rem, 1vw, 0.8rem);
+    letter-spacing: 0.12em;
+  }
+
+  .carousel {
+    width: 66%;
+  }
+
+}
+/* ==========================================
+   17. スマートフォン表示レスポンシブ（768px以下）
+   ========================================== */
+@media (max-width: 768px) {
+  .header { 
+    padding: 12px 15px; 
+    position: relative;
+  }
+
+  .header-inner { 
+    flex-direction: column; 
+    gap: 10px; 
+  }
+
+  .site-title a {
+    font-size: 1.4rem;
+    padding: 4px 16px;
+  }
+
+  .nav ul { 
+    gap: 6px 10px;
+    padding: 6px 10px;
+    width: 100%;
+  }
+
+  .nav-anchor {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+  }
+
+  .nav-btn-main {
+    padding: 4px 12px;
+    font-size: 0.7rem;
+  }
+
+  /* --- メインビジュアル（スマホ横並び・上端揃え） --- */
+  .hero {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    min-height: auto; /* 高さを自動調整にします */
+    
+    /* 💡【重要】flex配置にして、スマホでも縦並びにせず横並びを維持します */
+    display: flex; 
+    flex-direction: row; 
+    
+/* ⬇️ ⭕ 修正後：この1行に変えるだけで、画像の縦の中心に文章が配置されます */
+    align-items: center; 
+    justify-content: space-between;
+    gap: 10px; /* 文章と写真の間のすき間 */
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+  }
+
+  .hero-text-wrap {
+    flex: 0 1 40%;
+  width: auto;
+  min-width: 0;
+  padding: 0;
+  z-index: 2;
+  }
+
+  .hero-catch { 
+    /* スマホの横並びでも文字が溢れないよう、フォントサイズを最適化します */
+    font-size: 1.1rem; 
+    line-height: 1.4;
+    margin-bottom: clamp(10px, 2vw, 16px);
+  }
+
+  .hero-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+  }
+
+  .carousel {
+  flex: 0 1 60%;
+  width: auto;
+  min-width: 0;
+  position: relative;
+  top: auto;
+  right: auto;
+  height: clamp(150px, 35vw, 240px);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+  /* カルーセル内のスライド画像も枠線いっぱいに広げます */
+  .carousel-slides,
+  .slide,
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* カルーセルの矢印ボタンをスマホのサイズに合わせて少し小さく調整します */
+  .carousel-arrow {
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
+    line-height: 26px;
+  }
+
+  .carousel-arrow.prev { left: 5px; }
+  .carousel-arrow.next { right: 5px; }
+  
+  /* ドットの位置を写真の下部中央に綺麗に収めます */
+  .carousel-dots {
+    bottom: 10px;
+  }
+
+
+  /* --- コンテンツセクション --- */
+  .section,
+  .concept-section,
+  .staff-section,
+  .gallery-section,
+  .menu-section,
+  .news-section,
+  .reservation-section,
+  .access-section {
+    padding: 60px 0;
+  }
+
+/* --- CONCEPT（スマホ中央寄せ・統一版） --- */
+  .concept-section {
+    text-align: center; /* エリア全体を中央寄せ */
+  }
+
+  .concept-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .concept-content-card {
+    width: 100%;
+  }
+
+  .concept-image-pc {
+    display: none;
+  }
+  .concept-image-sp {
+    display: block;
+    width: 100%;
+    margin-top: 20px;   /* ⬅️ 【追加】タイトル文章と写真の間の距離をここで空けます！ */
+    margin-bottom: 24px;
+  }
+
+  .concept-img {
+    height: 260px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .concept-title,
+  .concept-title * {
+    font-size: 1.3rem; /* スマホ画面に合わせたサイズ */
+    margin-bottom: 0;  /* タイトル下の余白をリセットして、上のmargin-topで調整 */
+    text-align: center;
+  }
+
+  /* --- STAFF（スマホ並び替え・完全版） --- */
+  .staff-container {
+    display: flex;
+    flex-direction: column !important;
+    gap: 0;
+  }
+
+  /* 仕切りの箱を無くしてバラします */
+  .staff-content-card {
+    display: contents;
+  }
+
+  /* STAFFも理想の順番に完全ロックします */
+  .staff-container .section-en { 
+    order: 1; 
+    margin-bottom: 8px; 
+  }
+  .staff-container .staff-title { 
+    order: 2; 
+    margin-bottom: 24px; 
+  }
+  .staff-container .staff-image-wrap { 
+    order: 3; 
+    width: 100%; 
+    margin-bottom: 24px; 
+  }
+  .staff-container .staff-text { 
+    order: 4; 
+    margin-bottom: 24px; 
+  }
+  
+  /* ⬇️ ⭕【ここを修正】.concept-btn-wrap から .staff-btn-wrap に修正しました */
+  .staff-container .staff-btn-wrap { 
+    order: 5; 
+    text-align: left;
+    margin-top: 10px; /* ボタンの上に少しだけ心地よい隙間を作ります */
+  }
+
+  .staff-img {
+    height: 260px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .news-item {
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .news-thumb {
+    width: 75px;
+    height: 60px;
+  }
+
+  .news-text { 
+    font-size: 0.85rem; 
+  }
+
+  .reserve-btn-group {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .reserve-btn {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .info-item.full-width {
+    grid-column: span 1;
+  }
+
+  .info-item span {
+    display: block;
+    width: auto;
+    margin-bottom: 2px;
+  }
+
+  .access-bottom-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .map-container {
+    min-height: 250px;
+  }
+
+  .scroll-top-btn {
+    bottom: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .fixed-reserve-btn {
+    bottom: 15px;
+    right: 15px;
+    padding: 8px 16px;
+  }
+
+  .fixed-reserve-btn .btn-en {
+    font-size: 0.65rem;
+  }
+
+  .fixed-reserve-btn .btn-ja {
+    font-size: 0.6rem;
+  }
+
+  .footer {
+    padding-bottom: 85px;
+  }
+}
+
+/* ==========================================
+   下層ページ用 レスポンシブ補正
+   ========================================== */
+@media (max-width: 1024px) {
+  /* PC〜タブレットでヘッダーが高くなった分、下層ヘッダーの上余白を広げて被りを防ぐ */
+  .page-header {
+    padding-top: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* スマホではヘッダーが relative（通常配置）になるため、上余白を小さく調整 */
+  .page-header {
+    padding-top: 40px;
+    padding-bottom: 30px;
+  }
+}
+
+
+/* カテゴリボタン（スマホ時などに横スライドできるように調整） */
+.filter-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 35px;
+}
+
+@media (max-width: 768px) {
+  .filter-container {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto; /* 横スクロールを許可 */
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-btn {
+    white-space: nowrap; /* ボタン内の文字改行を防ぐ */
+    flex-shrink: 0;
+  }
+}
+
+/* ページネーション（次へ・前へボタンのスタイル） */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.page-btn, .page-number {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  height: 36px;
+  min-width: 36px;
+  padding: 0 10px;
+  border: 1px solid #eae5dc;
+  border-radius: 18px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  color: #555;
+  cursor: pointer;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover, .page-number:hover,
+.page-number.active {
+  background-color: #b39b72;
+  color: #fff;
+  border-color: #b39b72;
+}
+
+.page-ellipsis {
+  font-family: 'Cinzel', serif;
+  color: #aaa;
+  padding: 0 4px;
+}
+
+
+/* --- MENU（スマホ並び替え・縦並び化） --- */
+  .menu-container {
+    display: flex;
+    flex-direction: column !important; /* 縦一列に並べる */
+    gap: 0;
+  }
+
+  /* 箱の仕切りを解除して要素を対等に並べ替える */
+  .menu-content-card {
+    display: contents;
+  }
+
+  /* 表示順序のコントロール */
+  .menu-container .section-en {
+    order: 1;
+    margin-bottom: 8px;
+  }
+
+  .menu-container .menu-title {
+    order: 2;
+    margin-bottom: 12px;
+  }
+
+  .menu-container .menu-lead {
+    order: 3;
+    margin-bottom: 24px;
+  }
+
+  .menu-container .menu-group {
+    order: 4;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .menu-container .menu-image-wrap {
+    order: 5;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .menu-container .menu-btn-wrap {
+    order: 6;
+    width: 100%;
+    text-align: center; /* スマホでは中央寄せで押しやすく */
+  }
+
+  /* 写真の高さ調整 */
+  .menu-img {
+    height: 260px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  /* メニュー行のテキスト折り返し・調整 */
+  .menu-name {
+    font-size: 0.85rem;
+    white-space: normal; /* スマホで品名が長くなった場合に自動折り返し */
+  }
+
+  .menu-price {
+    font-size: 0.95rem;
+  }
+
+
+@media (min-width: 769px) and (max-width: 900px) {
+  .header-inner {
+    flex-direction: column;
+  }
+}
+
+
+/* ==========================================
+   💡【追加】フッターのCONCEPTや各ページを金色にする設定
+   ========================================== */
+.footer-nav a.active-concept {
+  color: #b39b72;       /* 各ページ共通の美しい金色 */
+  font-weight: 600;     /* ほんの少し文字を太くして視認性を上げます */
+}
+
+.footer-nav a.active-staff {
+  color: #b39b72;       /* 各ページ共通の美しい金色 */
+  font-weight: 600;     /* ほんの少し文字を太くして視認性を上げます */
+}
+
+
+.footer-nav a.active-gallery {
+  color: #b39b72;       /* 各ページ共通の美しい金色 */
+  font-weight: 600;     /* ほんの少し文字を太くして視認性を上げます */
+}
+
+
+.footer-nav a.active-menu {
+  color: #b39b72;       /* 各ページ共通の美しい金色 */
+  font-weight: 600;     /* ほんの少し文字を太くして視認性を上げます */
+}
+
+
+.footer-nav a.active-reservation {
+  color: #b39b72;
+  font-weight: 600;
+}
+
+
+/* microCMSのリッチテキスト（menu-lead内）の余白と崩れを補正 */
+.menu-lead {
+  margin-bottom: 24px; /* 下のメニュー一覧との余白 */
+  text-align: center;   /* 中央揃え（デザインに合わせて調整） */
+}
+
+.menu-lead h1,
+.menu-lead h2,
+.menu-lead h3,
+.menu-lead h4,
+.menu-lead h5,
+.menu-lead h6,
+.menu-lead p {
+  margin: 0 0 8px 0;   /* 上の余白をリセットして見出しより上に上がるのを防ぐ */
+  padding: 0;
+  line-height: 1.6;
+}
+

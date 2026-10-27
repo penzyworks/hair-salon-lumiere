@@ -1,0 +1,100 @@
+    // ① オープニング演出
+    document.addEventListener("DOMContentLoaded", () => {
+      const opening = document.getElementById("opening");
+      if (!sessionStorage.getItem("visited")) {
+        sessionStorage.setItem("visited", "true");
+        setTimeout(() => {
+          opening.classList.add("is-hidden");
+        }, 1200);
+      } else {
+        opening.style.display = "none";
+      }
+    });
+
+    // ② スクロールフェードイン
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
+
+    // ③ カルーセル処理
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    let currentIndex = 0;
+
+    function updateCarousel(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+      currentIndex = index;
+    }
+
+    function nextSlide() {
+      const newIndex = (currentIndex + 1) % slides.length;
+      updateCarousel(newIndex);
+    }
+
+    function prevSlide() {
+      const newIndex = (currentIndex - 1 + slides.length) % slides.length;
+      updateCarousel(newIndex);
+    }
+
+    if (nextBtn && prevBtn) {
+      nextBtn.addEventListener('click', nextSlide);
+      prevBtn.addEventListener('click', prevSlide);
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        const index = parseInt(e.target.dataset.index);
+        updateCarousel(index);
+      });
+    });
+
+    // ④ ギャラリー角度切り替え
+    function rotateStyleImage(box) {
+      const img = box.querySelector('img');
+      const badge = box.querySelector('.angle-badge');
+      const angles = JSON.parse(img.getAttribute('data-angles'));
+      let currentIndex = parseInt(img.getAttribute('data-index'));
+
+      currentIndex = (currentIndex + 1) % angles.length;
+
+      img.style.opacity = '0.3';
+      setTimeout(() => {
+        img.src = angles[currentIndex].src;
+        badge.textContent = angles[currentIndex].label;
+        img.setAttribute('data-index', currentIndex);
+        img.style.opacity = '1';
+      }, 150);
+    }
+
+    // ⑤ トップへ戻るボタン表示制御
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add('is-active');
+        } else {
+          scrollTopBtn.classList.remove('is-active');
+        }
+      });
+
+      scrollTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    }

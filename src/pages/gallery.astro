@@ -1,0 +1,580 @@
+---
+import '../styles/style.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { client } from "../library/microcms";
+
+// CMSからギャラリー一覧を取得（管理画面の並び順）
+const response = await client.get({
+  endpoint: "gallery",
+  queries: {
+    limit: 100,
+  },
+});
+
+const galleryList = response.contents;
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HAIR STYLE GALLERY｜HAIR SALON LUMIÈRE（ルミエール）</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <!-- 固定予約ボタン（右下） -->
+    <a href={import.meta.env.BASE_URL + '#reservation'} class="fixed-reserve-btn">
+      <span class="btn-en">WEB RESERVATION</span>
+      <span class="btn-ja">ご予約はこちら</span>
+    </a>
+
+    <Header />
+
+    <main>
+      <section class="page-header">
+        <span class="page-title-en">HAIR STYLE GALLERY</span>
+        <p class="page-title-ja">スタイルギャラリー</p>
+      </section>
+
+      <section class="gallery-detail-section">
+        <div class="container">
+          
+          <!-- カテゴリ切り替えボタン -->
+          <div class="filter-container">
+            <button class="filter-btn active" data-filter="all">ALL</button>
+            <button class="filter-btn" data-filter="short">SHORT / BOB</button>
+            <button class="filter-btn" data-filter="medium">MEDIUM / LONG</button>
+            <button class="filter-btn" data-filter="color">COLOR</button>
+            <button class="filter-btn" data-filter="perm">PERM / ARRANGE</button>
+          </div>
+
+          <!-- ギャラリーカード一覧 -->
+          <div class="gallery-grid-all" id="galleryGrid">
+            {galleryList && galleryList.length > 0 ? (
+              galleryList.map((item) => {
+                // カテゴリの判定（配列・文字列・オブジェクト対応）
+                const catRaw = Array.isArray(item.category) ? item.category[0] : item.category;
+                let catNormalized = 'all';
+                if (catRaw) {
+                  const lower = String(catRaw).toLowerCase();
+                  if (lower.includes('short') || lower.includes('bob')) catNormalized = 'short';
+                  else if (lower.includes('medium') || lower.includes('long')) catNormalized = 'medium';
+                  else if (lower.includes('color')) catNormalized = 'color';
+                  else if (lower.includes('perm') || lower.includes('arrange')) catNormalized = 'perm';
+                  else catNormalized = lower;
+                }
+
+                // 画像構造の自動判定
+                const angles = (item.images || [])
+                  .map((img: any) => {
+                    let url = '';
+                    if (img?.src?.url) url = img.src.url;
+                    else if (typeof img?.src === 'string') url = img.src;
+                    else if (img?.url) url = img.url;
+
+                    return {
+                      src: url,
+                      label: img?.label || 'FRONT'
+                    };
+                  })
+                  .filter((a: any) => a.src !== '');
+
+                const firstImage = angles.length > 0 ? angles[0].src : '';
+                const firstLabel = angles.length > 0 ? angles[0].label : 'FRONT';
+                const hasMultipleAngles = angles.length > 1;
+
+                return (
+                  <div class="gallery-card gallery-item" data-category={catNormalized}>
+                    <div class="gallery-img-box" style={!hasMultipleAngles ? "cursor: default;" : "cursor: pointer;"}>
+                      {hasMultipleAngles && <span class="angle-badge">{firstLabel}</span>}
+                      {firstImage ? (
+                        <img 
+                          src={firstImage} 
+                          data-angles={hasMultipleAngles ? JSON.stringify(angles) : undefined} 
+                          data-index="0" 
+                          alt={item.styleName || 'ヘアスタイル'} 
+                          class="gallery-img"
+                        />
+                      ) : (
+                        <div class="no-image-placeholder">No Image</div>
+                      )}
+                    </div>
+                    <div class="gallery-info">
+                      <p class="style-name">{item.styleName}</p>
+                      <p class="style-menu">{item.styleMenu}</p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p class="no-data">スタイル情報がありません。</p>
+            )}
+          </div>
+
+          <!-- ページネーション（JS動的生成） -->
+          <div class="pagination-container" id="pagination"></div>
+
+          <!-- TOPへ戻る導線 -->
+          <div class="back-home-wrap">
+            <a href={import.meta.env.BASE_URL} class="back-home-btn">
+              ‹ TOPページへ戻る
+            </a>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <!-- トップへ戻るボタン -->
+    <a href="#" id="scrollTopBtn" class="scroll-top-btn" aria-label="ページトップへ戻る">↑</a>
+
+    <Footer />
+
+    <!-- JavaScript：カテゴリ切替・アングル切替・6件ずつのページネーション -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // 1. アングル切り替え（フェードアウト効果付き）
+        const imgBoxes = document.querySelectorAll('.gallery-img-box');
+        imgBoxes.forEach(box => {
+          box.addEventListener('click', () => {
+            const img = box.querySelector('img') as HTMLImageElement | null;
+            const badge = box.querySelector('.angle-badge');
+            if (!img) return;
+
+            const anglesData = img.getAttribute('data-angles');
+            if (!anglesData) return;
+
+            try {
+              const angles = JSON.parse(anglesData);
+              if (!angles || angles.length <= 1) return;
+
+              let currentIndex = parseInt(img.getAttribute('data-index') || '0', 10);
+              let nextIndex = (currentIndex + 1) % angles.length;
+
+              img.style.opacity = '0.3';
+              setTimeout(() => {
+                img.src = angles[nextIndex].src;
+                if (badge) badge.textContent = angles[nextIndex].label;
+                img.setAttribute('data-index', nextIndex.toString());
+                img.style.opacity = '1';
+              }, 150);
+            } catch (e) {
+              console.error("アングル切り替えエラー:", e);
+            }
+          });
+        });
+
+        // 2. フィルタ＆ページネーション制御（1ページあたり6件表示）
+        const ITEMS_PER_PAGE = 6;
+        let currentFilter = 'all';
+        let currentPage = 1;
+
+        const allItems = Array.from(document.querySelectorAll('.gallery-item')) as HTMLElement[];
+        const paginationEl = document.getElementById('pagination');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        function updateGallery() {
+          const filteredItems = allItems.filter(item => {
+            if (currentFilter === 'all') return true;
+            return item.getAttribute('data-category') === currentFilter;
+          });
+
+          const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+          if (currentPage > totalPages) currentPage = 1;
+
+          // 全件非表示にする
+          allItems.forEach(item => item.classList.add('js-hide'));
+
+          // 対象ページのアイテムのみ表示
+          const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+          const endIndex = startIndex + ITEMS_PER_PAGE;
+          const pageItems = filteredItems.slice(startIndex, endIndex);
+
+          pageItems.forEach(item => item.classList.remove('js-hide'));
+
+          renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages: number) {
+          if (!paginationEl) return;
+          paginationEl.innerHTML = '';
+          if (totalPages <= 1) return;
+
+          // 「前へ」ボタン
+          if (currentPage > 1) {
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '‹';
+            prevBtn.addEventListener('click', () => {
+              currentPage--;
+              updateGallery();
+              scrollToGalleryTop();
+            });
+            paginationEl.appendChild(prevBtn);
+          }
+
+          const maxVisiblePages = 5;
+          let startPage = Math.max(1, currentPage - 2);
+          let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+          if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+          }
+
+          if (startPage > 1) {
+            addPageNumBtn(1);
+            if (startPage > 2) {
+              const ellipsis = document.createElement('span');
+              ellipsis.className = 'page-ellipsis';
+              ellipsis.textContent = '...';
+              paginationEl.appendChild(ellipsis);
+            }
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            addPageNumBtn(i);
+          }
+
+          if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+              const ellipsis = document.createElement('span');
+              ellipsis.className = 'page-ellipsis';
+              ellipsis.textContent = '...';
+              paginationEl.appendChild(ellipsis);
+            }
+            addPageNumBtn(totalPages);
+          }
+
+          // 「次へ」ボタン
+          if (currentPage < totalPages) {
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '›';
+            nextBtn.addEventListener('click', () => {
+              currentPage++;
+              updateGallery();
+              scrollToGalleryTop();
+            });
+            paginationEl.appendChild(nextBtn);
+          }
+        }
+
+        function addPageNumBtn(page: number) {
+          if (!paginationEl) return;
+          const btn = document.createElement('button');
+          btn.className = `page-number ${page === currentPage ? 'active' : ''}`;
+          btn.textContent = page.toString();
+          btn.addEventListener('click', () => {
+            currentPage = page;
+            updateGallery();
+            scrollToGalleryTop();
+          });
+          paginationEl.appendChild(btn);
+        }
+
+        function scrollToGalleryTop() {
+          const grid = document.getElementById('galleryGrid');
+          if (grid) {
+            grid.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+
+        filterBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.getAttribute('data-filter') || 'all';
+            currentPage = 1;
+            updateGallery();
+          });
+        });
+
+        // 初期化実行
+        updateGallery();
+
+        // 3. トップへ戻るボタン
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        if (scrollTopBtn) {
+          window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+              scrollTopBtn.classList.add('is-active');
+            } else {
+              scrollTopBtn.classList.remove('is-active');
+            }
+          });
+
+          scrollTopBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+      });
+    </script>
+
+    <style>
+      /* ==========================================
+         GALLERY ページ専用デザイン（gallery.html準拠）
+         ========================================== */
+      .page-header {
+        padding-top: 140px;
+        padding-bottom: 50px;
+        background-color: #f8f6f2;
+        text-align: center;
+      }
+
+      .page-title-en {
+        font-family: 'Cinzel', serif;
+        font-size: 1.8rem;
+        letter-spacing: 0.25em;
+        color: #b39b72;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .page-title-ja {
+        font-size: 0.85rem;
+        color: #777;
+        letter-spacing: 0.12em;
+      }
+
+      .gallery-detail-section {
+        padding: 60px 0 90px;
+        background-color: #fff;
+      }
+
+      /* カテゴリタブフィルタ */
+      .filter-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 35px;
+      }
+
+      .filter-btn {
+        background: none;
+        border: 1px solid #eae5dc;
+        padding: 8px 18px;
+        border-radius: 25px;
+        font-family: 'Cinzel', serif;
+        font-size: 0.8rem;
+        letter-spacing: 0.1em;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .filter-btn:hover,
+      .filter-btn.active {
+        background-color: #1a1a1a;
+        color: #ffffff;
+        border-color: #1a1a1a;
+      }
+
+      /* ギャラリーグリッド配置 */
+      .gallery-grid-all {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        min-height: 400px;
+      }
+
+      .gallery-item {
+        transition: opacity 0.3s ease;
+      }
+
+      .gallery-item.js-hide {
+        display: none !important;
+      }
+
+      .gallery-card {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        transition: transform 0.3s ease;
+      }
+
+      .gallery-card:hover {
+        transform: translateY(-4px);
+      }
+
+      .gallery-img-box {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        background: #f0f0f0;
+        overflow: hidden;
+      }
+
+      .gallery-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: opacity 0.15s ease;
+      }
+
+      .angle-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        letter-spacing: 0.1em;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .no-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aaa;
+        font-size: 0.9rem;
+        background: #eee;
+      }
+
+      .gallery-info {
+        padding: 16px;
+      }
+
+      .style-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 6px;
+      }
+
+      .style-menu {
+        font-size: 0.8rem;
+        color: #777;
+      }
+
+      /* ページネーション（次へ・前へ・数字） */
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 40px;
+        margin-bottom: 40px;
+      }
+
+      .page-btn, :global(.page-number) {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        height: 36px;
+        min-width: 36px;
+        padding: 0 10px;
+        border: 1px solid #eae5dc;
+        border-radius: 18px;
+        font-family: 'Cinzel', serif;
+        font-size: 0.8rem;
+        color: #555;
+        cursor: pointer;
+        background: #fff;
+        transition: all 0.3s ease;
+      }
+
+      .page-btn:hover, :global(.page-number:hover),
+      :global(.page-number.active) {
+        background-color: #b39b72;
+        color: #fff;
+        border-color: #b39b72;
+      }
+
+      :global(.page-ellipsis) {
+        font-family: 'Cinzel', serif;
+        color: #aaa;
+        padding: 0 4px;
+      }
+
+      /* 導線ボタン */
+      .back-home-wrap {
+        text-align: center;
+        padding-top: 10px;
+      }
+
+      .back-home-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 35px;
+        background-color: #1a1a1a;
+        color: #fff;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .back-home-btn:hover {
+        background-color: #b39b72;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(179, 155, 114, 0.4);
+      }
+
+      .no-data {
+        text-align: center;
+        grid-column: 1 / -1;
+        color: #888;
+        padding: 40px 0;
+      }
+
+      /* レスポンシブ対応 */
+      @media (max-width: 1024px) {
+        .page-header {
+          padding-top: 180px;
+        }
+        .gallery-grid-all {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .page-header {
+          padding-top: 35px;
+          padding-bottom: 30px;
+        }
+        .gallery-detail-section {
+          padding: 40px 0 60px;
+        }
+        .filter-container {
+          justify-content: flex-start;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          padding-bottom: 10px;
+          -webkit-overflow-scrolling: touch;
+        }
+        .filter-btn {
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .gallery-grid-all {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 15px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .gallery-grid-all {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </body>
+</html>

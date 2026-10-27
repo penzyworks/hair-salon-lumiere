@@ -1,0 +1,277 @@
+---
+import '../styles/style.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STAFF｜HAIR SALON LUMIÈRE（ルミエール）</title>
+  
+  <!-- フォント（Cinzel / Shippori Mincho） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       STAFF ページ専用スタイル
+       ========================================== */
+    .page-header {
+      padding-top: 140px;
+      padding-bottom: 50px;
+      background-color: #f8f6f2;
+      text-align: center;
+    }
+
+    .page-title-en {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.25em;
+      color: #b39b72;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .page-title-ja {
+      font-size: 0.85rem;
+      color: #777;
+      letter-spacing: 0.12em;
+    }
+
+    .staff-detail-section {
+      padding: 90px 0;
+      background-color: #fff;
+    }
+
+    .staff-profile-card {
+      display: flex;
+      gap: 50px;
+      align-items: flex-start;
+      background: #faf9f6;
+      padding: 50px;
+      border-radius: 8px;
+      border: 1px solid #eae5dc;
+      margin-bottom: 60px;
+    }
+
+    .staff-img-wrap {
+      width: 38%;
+      flex-shrink: 0;
+    }
+
+    .staff-img-wrap img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      border-radius: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+
+    .staff-info-wrap {
+      width: 62%;
+    }
+
+    .staff-post {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.2em;
+      color: #b39b72;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .staff-name-ja {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .staff-name-en {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      color: #888;
+      letter-spacing: 0.15em;
+      margin-bottom: 25px;
+      display: block;
+    }
+
+    .staff-message {
+      font-size: 0.95rem;
+      line-height: 2.1;
+      color: #444;
+      margin-bottom: 35px;
+      padding-bottom: 25px;
+      border-bottom: 1px dashed #e0dcd5;
+    }
+
+    .staff-spec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .spec-item {
+      display: flex;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .spec-label {
+      width: 130px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #b39b72;
+      flex-shrink: 0;
+    }
+
+    .spec-val {
+      color: #333;
+    }
+
+    /* TOPに戻るボタンエリア */
+    .back-home-wrap {
+      text-align: center;
+      padding: 20px 0 40px;
+    }
+
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 40px;
+      background-color: #1a1a1a;
+      color: #fff;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      transition: all 0.3s ease;
+    }
+
+    .back-home-btn:hover {
+      background-color: #b39b72;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(179, 155, 114, 0.4);
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 1024px) {
+      .page-header {
+        padding-top: 180px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .staff-profile-card {
+        flex-direction: column;
+        padding: 30px 20px;
+        gap: 30px;
+      }
+      .staff-img-wrap,
+      .staff-info-wrap {
+        width: 100%;
+      }
+      .staff-img-wrap img {
+        height: 360px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        padding-top: 35px;
+        padding-bottom: 30px;
+      }
+      .staff-detail-section {
+        padding: 50px 0;
+      }
+      .spec-item {
+        flex-direction: column;
+      }
+      .spec-label {
+        width: 100%;
+        margin-bottom: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 固定予約ボタン（右下） -->
+  <a href="/#reservation" class="fixed-reserve-btn">
+    <span class="btn-en">WEB RESERVATION</span>
+    <span class="btn-ja">ご予約はこちら</span>
+  </a>
+
+  <!-- ヘッダー呼び出し（STAFF指定） -->
+  <Header current="staff" />
+
+  <main>
+    <!-- 下層ページ用 ページヘッダー -->
+    <section class="page-header">
+      <span class="page-title-en">STAFF</span>
+      <p class="page-title-ja">スタイリスト紹介</p>
+    </section>
+
+    <!-- スタッフ詳細セクション -->
+    <section class="staff-detail-section">
+      <div class="container">
+        
+        <!-- スタッフ1名分のカード -->
+        <div class="staff-profile-card fade-in">
+          <div class="staff-img-wrap">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80" alt="オーナー美容師 兼松 葵">
+          </div>
+          <div class="staff-info-wrap">
+            <span class="staff-post">OWNER / STYLIST</span>
+            <h2 class="staff-name-ja">兼松 葵</h2>
+            <span class="staff-name-en">AOI KANEMATSU</span>
+
+            <p class="staff-message">
+              表参道の大型サロンで12年間のキャリアを積み、プライベートサロン「LUMIÈRE」をオープンいたしました。<br><br>
+              髪質や骨格に合わせたショート・ボブのカットと、ダメージを抑えた髪質改善カラーを得意としています。「朝のスタイリングが楽になる」「自分に似合うスタイルが分からない」といったお悩みをぜひご相談ください。一人ひとりのお客様と誠実に向き合い、魅力を引き出すお手伝いをさせていただきます。
+            </p>
+
+            <div class="staff-spec-list">
+              <div class="spec-item">
+                <span class="spec-label">SPECIALTY</span>
+                <span class="spec-val">ショート・ボブカット / 髪質改善オーガニックカラー / 似合わせ提案</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">CAREER</span>
+                <span class="spec-val">美容師歴12年（表参道サロンにて店長経験あり）</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">HOBBY</span>
+                <span class="spec-val">インテリア巡り、カフェ散策、写真撮影</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOPへ戻る導線 -->
+        <div class="back-home-wrap">
+          <a href="/" class="back-home-btn">
+            ‹ TOPページへ戻る
+          </a>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- トップへ戻るボタン -->
+  <a href="#" id="scrollTopBtn" class="scroll-top-btn" aria-label="ページトップへ戻る">↑</a>
+
+  <!-- フッター呼び出し（STAFF指定） -->
+  <Footer current="staff" />
+
+  <!-- 共通JSの読み込み -->
+  <script src="../scripts/main.js"></script>
+</body>
+</html>

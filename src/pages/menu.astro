@@ -1,0 +1,459 @@
+---
+import '../styles/style.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { client } from '../library/microcms';
+import type { MenuItem } from '../library/microcms';
+
+// microCMSからメニュー一覧を取得（sortOrder順）
+const response = await client.get({
+  endpoint: 'menu',
+  queries: { 
+    limit: 100,
+    orders: "sortOrder", // ★ 数字の小さい順に取得
+  },
+});
+const menuList: MenuItem[] = response.contents;
+
+// カテゴリ判定用の補助関数（大文字・小文字を無視してチェック）
+const checkCategory = (item: MenuItem, catName: string) => {
+  if (!item.category) return false;
+  const cat = String(item.category).toLowerCase();
+  return cat.includes(catName.toLowerCase());
+};
+
+// カテゴリごとにグループ分け（cut, color, perm, treatment/spaに対応）
+const cutList = menuList.filter(item => checkCategory(item, 'cut'));
+const colorList = menuList.filter(item => checkCategory(item, 'color'));
+const permList = menuList.filter(item => checkCategory(item, 'perm'));
+const spaList = menuList.filter(item => checkCategory(item, 'treatment') || checkCategory(item, 'spa'));
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MENU｜HAIR SALON LUMIÈRE（ルミエール）</title>
+  
+  <!-- フォント（Cinzel / Shippori Mincho） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       MENU ページ専用デザイン
+       ========================================== */
+    .page-header {
+      padding-top: 140px;
+      padding-bottom: 50px;
+      background-color: #f8f6f2;
+      text-align: center;
+    }
+
+    .page-title-en {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.25em;
+      color: #b39b72;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .page-title-ja {
+      font-size: 0.85rem;
+      color: #777;
+      letter-spacing: 0.12em;
+    }
+
+    /* メニューコンテンツ全般 */
+    .menu-page-section {
+      padding: 80px 0 100px;
+      background-color: #fff;
+    }
+
+    .menu-page-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .menu-notice-box {
+      background-color: #faf9f6;
+      border: 1px solid #eae5dc;
+      padding: 24px 30px;
+      border-radius: 6px;
+      margin-bottom: 60px;
+      font-size: 0.88rem;
+      color: #666;
+      line-height: 1.8;
+    }
+
+    .menu-notice-title {
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .menu-notice-list {
+      list-style-type: disc;
+      padding-left: 20px;
+      margin: 0;
+    }
+
+    /* 各メニューブロック */
+    .menu-category-block {
+      margin-bottom: 70px;
+    }
+
+    .menu-category-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #b39b72;
+      margin-bottom: 30px;
+    }
+
+    .menu-cat-title-en {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      color: #1a1a1a;
+      letter-spacing: 0.15em;
+      font-weight: 600;
+    }
+
+    .menu-cat-title-ja {
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 0.08em;
+    }
+
+    /* メニューリスト */
+    .menu-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .menu-item-row {
+      border-bottom: 1px dashed #e0dcd5;
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .menu-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 20px;
+    }
+
+    .menu-item-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      letter-spacing: 0.03em;
+    }
+
+    .menu-item-price {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #b39b72;
+      white-space: nowrap;
+    }
+
+    .menu-item-desc {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.7;
+    }
+
+    .menu-tax-note {
+      font-size: 0.8rem;
+      color: #888;
+      text-align: right;
+      margin-top: -10px;
+      margin-bottom: 40px;
+    }
+
+    /* 予約誘導バナー */
+    .menu-cta-banner {
+      background-color: #fdfbf7;
+      border: 1px solid #eae5dc;
+      padding: 50px 30px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .cta-banner-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+    }
+
+    .cta-banner-text {
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 30px;
+    }
+
+    .cta-reserve-btn {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #1a1a1a;
+      color: #fff;
+      padding: 16px 50px;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(179, 155, 114, 0.3);
+    }
+
+    .cta-reserve-btn:hover {
+      background-color: #b39b72;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .cta-reserve-btn .btn-en {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.15em;
+    }
+
+    .cta-reserve-btn .btn-ja {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      opacity: 0.9;
+    }
+
+    /* TOPに戻るボタンエリア */
+    .back-home-wrap {
+      text-align: center;
+      padding: 50px 0 20px;
+    }
+
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 40px;
+      background-color: #1a1a1a;
+      color: #fff;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      transition: all 0.3s ease;
+    }
+
+    .back-home-btn:hover {
+      background-color: #b39b72;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(179, 155, 114, 0.4);
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 1024px) {
+      .page-header {
+        padding-top: 180px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        padding-top: 35px;
+        padding-bottom: 30px;
+      }
+      .menu-page-section {
+        padding: 50px 0 70px;
+      }
+      .menu-item-header {
+        flex-direction: column;
+        gap: 4px;
+      }
+      .menu-item-price {
+        font-size: 1rem;
+      }
+      .menu-category-header {
+        flex-direction: column;
+        gap: 4px;
+      }
+      .cta-banner-title {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 固定予約ボタン（右下） -->
+  <a href={import.meta.env.BASE_URL + '#reservation'} class="fixed-reserve-btn">
+    <span class="btn-en">WEB RESERVATION</span>
+    <span class="btn-ja">ご予約はこちら</span>
+  </a>
+
+  <!-- ヘッダー（MENU指定） -->
+  <Header current="menu" />
+
+  <main>
+    <!-- 下層ページ用 ページヘッダー -->
+    <section class="page-header">
+      <span class="page-title-en">MENU & PRICE</span>
+      <p class="page-title-ja">メニュー・料金一覧</p>
+    </section>
+
+    <!-- メニューメインコンテンツ -->
+    <section class="menu-page-section">
+      <div class="container menu-page-container">
+        
+        {menuList && menuList[0]?.info && (
+    <div class="menu-info-box" set:html={menuList[0].info} />
+  )}
+
+        <!-- 1. CUT -->
+<div class="menu-category-block fade-in">
+  <div class="menu-category-header">
+    <h2 class="menu-cat-title-en">CUT</h2>
+    <span class="menu-cat-title-ja">カット</span>
+  </div>
+  <div class="menu-list">
+    {cutList.map((item) => (
+      <div class="menu-item-row">
+        <div class="menu-item-header">
+          <span class="menu-item-name">{item.title}</span>
+          <span class="menu-item-price">{item.price}</span>
+        </div>
+        {item.description && <p class="menu-item-desc">{item.description}</p>}
+      </div>
+    ))}
+  </div>
+</div>
+
+       <!-- 2. COLOR -->
+        <div class="menu-category-block fade-in">
+          <div class="menu-category-header">
+            <h2 class="menu-cat-title-en">COLOR</h2>
+            <span class="menu-cat-title-ja">カラー</span>
+          </div>
+          <div class="menu-list">
+            {colorList.map((item) => (
+              <div class="menu-item-row">
+                <div class="menu-item-header">
+                  <span class="menu-item-name">{item.title}</span>
+                  <span class="menu-item-price">{item.price}</span>
+                </div>
+                {item.description && <p class="menu-item-desc">{item.description}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- 3. PERM -->
+        <div class="menu-category-block fade-in">
+          <div class="menu-category-header">
+            <h2 class="menu-cat-title-en">PERM</h2>
+            <span class="menu-cat-title-ja">パーマ / 縮毛矯正</span>
+          </div>
+          <div class="menu-list">
+            {permList.map((item) => (
+              <div class="menu-item-row">
+                <div class="menu-item-header">
+                  <span class="menu-item-name">{item.title}</span>
+                  <span class="menu-item-price">{item.price}</span>
+                </div>
+                {item.description && <p class="menu-item-desc">{item.description}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- 4. TREATMENT & HEAD SPA -->
+        <div class="menu-category-block fade-in">
+          <div class="menu-category-header">
+            <h2 class="menu-cat-title-en">TREATMENT & SPA</h2>
+            <span class="menu-cat-title-ja">トリートメント・ヘッドスパ</span>
+          </div>
+          <div class="menu-list">
+            {spaList.map((item) => (
+              <div class="menu-item-row">
+                <div class="menu-item-header">
+                  <span class="menu-item-name">{item.title}</span>
+                  <span class="menu-item-price">{item.price}</span>
+                </div>
+                {item.description && <p class="menu-item-desc">{item.description}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Web予約誘導カード -->
+        <div class="menu-cta-banner fade-in">
+          <h3 class="cta-banner-title">ONLINE RESERVATION</h3>
+          <p class="cta-banner-text">
+            Web予約では24時間いつでも空き状況をご確認いただけます。<br>
+            ご不明な点やコースのご相談もお気軽にお問い合わせください。
+          </p>
+          <a href={import.meta.env.BASE_URL + '#reservation'} class="cta-reserve-btn">
+            <span class="btn-en">WEB RESERVATION</span>
+            <span class="btn-ja">24時間Web予約はこちら</span>
+          </a>
+        </div>
+
+        <!-- TOPへ戻る導線 -->
+        <div class="back-home-wrap">
+          <a href={import.meta.env.BASE_URL} class="back-home-btn">
+            ‹ TOPページへ戻る
+          </a>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- トップへ戻るボタン -->
+  <a href="#" id="scrollTopBtn" class="scroll-top-btn" aria-label="ページトップへ戻る">↑</a>
+
+  <!-- フッター（MENU指定） -->
+  <Footer current="menu" />
+
+  <!-- JSスクリプト -->
+  <script is:inline>
+    // フェードインアニメーション
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
+
+    // Topに戻るボタン制御
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add('is-active');
+        } else {
+          scrollTopBtn.classList.remove('is-active');
+        }
+      });
+
+      scrollTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+  </script>
+</body>
+</html>

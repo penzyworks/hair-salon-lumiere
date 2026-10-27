@@ -1,8 +1,12 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// https://astro.build/config
 export default defineConfig({
-  site: 'https://penzyworks.github.io/hair-salon-lumiere/',
-  base: '/hair-salon-lumiere/',
+  site: 'https://penzyworks.github.io',
+  base: '/hair-salon-lumiere',
+  vite: {
+    build: {
+      cssMinify: false,
+    },
+  },
 });

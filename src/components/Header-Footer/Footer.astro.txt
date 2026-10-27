@@ -1,0 +1,76 @@
+---
+interface Props {
+  current?: string;
+  isHome?: boolean;
+}
+
+const { current = '', isHome = false } = Astro.props;
+
+const getLink = (anchor: string, path: string) => {
+  return isHome ? `#${anchor}` : path;
+};
+---
+
+<footer class="footer">
+  <div class="container footer-container">
+    
+    <div class="footer-brand">
+      <span class="footer-logo">HAIR SALON LUMIÈRE</span>
+      <p class="footer-sub">上質な空間と似合わせ技術を提供するプライベートサロン</p>
+    </div>
+
+    <div class="footer-info">
+      <p class="footer-info-item"><strong>ADDRESS :</strong> 〒107-0062 東京都港区南青山 0-0-0</p>
+      <p class="footer-info-item"><strong>TEL :</strong> <a href="tel:0312345678">03-1234-5678</a></p>
+      <p class="footer-info-item"><strong>OPEN :</strong> 10:00 - 20:00（最終受付 19:00）</p>
+      <p class="footer-info-item"><strong>CLOSED :</strong> 毎週火曜日 / 第2・第3月曜日</p>
+    </div>
+
+    <ul class="footer-nav">
+      <li>
+        {current === 'concept' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">CONCEPT</a>
+        ) : (
+          <a href={getLink('concept', '/#concept')}>CONCEPT</a>
+        )}
+      </li>
+      <li>
+        {current === 'staff' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">STAFF</a>
+        ) : (
+          <a href={getLink('staff', '/#staff')}>STAFF</a>
+        )}
+      </li>
+      <li>
+        {current === 'gallery' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">GALLERY</a>
+        ) : (
+          <a href={getLink('gallery', '/#gallery')}>GALLERY</a>
+        )}
+      </li>
+      <li>
+        {current === 'menu' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">MENU</a>
+        ) : (
+          <a href={getLink('menu', '/#menu')}>MENU</a>
+        )}
+      </li>
+      <li>
+        {current === 'news' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">NEWS</a>
+        ) : (
+          <a href={getLink('news', '/#news')}>NEWS</a>
+        )}
+      </li>
+      <li><a href={getLink('reservation', '/#reservation')}>RESERVATION</a></li>
+      <li><a href={getLink('access', '/#access')}>ACCESS</a></li>
+    </ul>
+
+    <div class="footer-sns">
+      <a href="https://www.instagram.com/アカウント名/" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>
+      <a href="https://line.me/R/ti/p/ラインのアカウントIDなど" target="_blank" rel="noopener" aria-label="LINE">LINE</a>
+    </div>
+
+    <p class="copyright">&copy; HAIR SALON LUMIÈRE. All Rights Reserved.</p>
+  </div>
+</footer>

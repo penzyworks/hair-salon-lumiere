@@ -1,0 +1,92 @@
+---
+interface Props {
+  current?: string;
+  isHome?: boolean;
+  headerTitle?: string;
+}
+
+const {
+  current = '',
+  isHome = false,
+  headerTitle = 'LUMIÈRE'
+} = Astro.props;
+
+// トップページならセクションへのリンク、下層ページならページへのリンク
+
+const getLink = (anchor: string, path: string) => {
+  if (isHome) {
+    return `#${anchor}`;
+  }
+
+  if (anchor === 'access' || anchor === 'reservation') {
+    return `${import.meta.env.BASE_URL}#${anchor}`;
+  }
+
+  return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+};
+
+---
+
+<header class="header">
+  <div class="header-inner">
+    <h1 class="site-title"><a href={import.meta.env.BASE_URL}>{headerTitle}</a></h1>
+    <nav class="nav">
+      <ul>
+        <!-- CONCEPT -->
+        <li>
+          {current === 'concept' ? (
+            <a class="nav-anchor" style="color: #b39b72; font-weight: 600; cursor: default;">CONCEPT</a>
+          ) : (
+            <a href={getLink('concept', '/concept/')} class="nav-anchor">CONCEPT</a>
+          )}
+        </li>
+
+        <!-- STAFF -->
+        <li>
+          {current === 'staff' ? (
+            <a class="nav-anchor" style="color: #b39b72; font-weight: 600; cursor: default;">STAFF</a>
+          ) : (
+            <a href={getLink('staff', '/staff/')} class="nav-anchor">STAFF</a>
+          )}
+        </li>
+
+        <!-- GALLERY -->
+        <li>
+          {current === 'gallery' ? (
+            <a class="nav-anchor" style="color: #b39b72; font-weight: 600; cursor: default;">GALLERY</a>
+          ) : (
+            <a href={getLink('gallery', '/gallery/')} class="nav-anchor">GALLERY</a>
+          )}
+        </li>
+
+        <!-- MENU -->
+        <li>
+          {current === 'menu' ? (
+            <a class="nav-anchor" style="color: #b39b72; font-weight: 600; cursor: default;">MENU</a>
+          ) : (
+            <a href={getLink('menu', '/menu/')} class="nav-anchor">MENU</a>
+          )}
+        </li>
+
+        <!-- NEWS -->
+        <li>
+          {current === 'news' ? (
+            <a class="nav-anchor" style="color: #b39b72; font-weight: 600; cursor: default;">NEWS</a>
+          ) : (
+            <a href={getLink('news', '/news/')} class="nav-anchor">NEWS</a>
+          )}
+        </li>
+
+        <!-- ACCESS -->
+        <li>
+          <a href={getLink('access', '/#access')} class="nav-anchor">ACCESS</a>
+        </li>
+
+        <!-- RESERVATION -->
+        <li>
+          <a href={getLink('reservation', '/#reservation')} class="nav-btn nav-btn-main">RESERVATION</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

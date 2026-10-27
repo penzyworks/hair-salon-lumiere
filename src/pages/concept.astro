@@ -1,0 +1,525 @@
+---
+// src/pages/concept.astro
+import '../styles/style.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { client } from '../library/microcms';
+
+export interface PageContent {
+  id: string;
+  pageId: string;
+  title?: string;
+  conceptSubtitle?: string;
+  conceptMainTitle?: string;
+  content?: string;
+  menuIntroText?: string;
+  menuBannerImage?: {
+    url: string;
+    width: number;
+    height: number;
+  };
+  // ★ 追加：OUR COMMITMENT メインタイトル＆コンテンツ
+  commitmentmainTitle?: string;
+  commitmentTitle1?: string;
+  commitmentText1?: string;
+  commitmentTitle2?: string;
+  commitmentText2?: string;
+  commitmentTitle3?: string;
+  commitmentText3?: string;
+  // ★ 追加：サロン雰囲気ギャラリー画像
+  atmosphereImageLarge?: {
+    url: string;
+    width?: number;
+    height?: number;
+  };
+  atmosphereImageSmall?: {
+    url: string;
+    width?: number;
+    height?: number;
+  };
+}
+
+export interface PagesResponse {
+  contents: PageContent[];
+}
+
+let pageData: PageContent | undefined;
+
+try {
+  const response = await client.get<PagesResponse>({
+    endpoint: 'pages',
+    queries: {
+      filters: 'pageId[equals]concept',
+      limit: 1,
+    },
+  });
+  
+  pageData = response.contents[0];
+} catch (error) {
+  console.error('pagesデータの取得に失敗しました:', error);
+}
+
+// 取得したデータ（フォールバック付き）
+const title = pageData?.title || 'CONCEPT';
+const conceptSubtitle = pageData?.conceptSubtitle || 'PHILOSOPHY';
+const conceptMainTitle = pageData?.conceptMainTitle;
+const content = pageData?.content;
+const menuIntroText = pageData?.menuIntroText;
+const menuBannerImage = pageData?.menuBannerImage;
+
+// OUR COMMITMENTデータ
+const commitmentmainTitle = pageData?.commitmentmainTitle || 'OUR COMMITMENT';
+const commitmentTitle1 = pageData?.commitmentTitle1;
+const commitmentText1 = pageData?.commitmentText1;
+const commitmentTitle2 = pageData?.commitmentTitle2;
+const commitmentText2 = pageData?.commitmentText2;
+const commitmentTitle3 = pageData?.commitmentTitle3;
+const commitmentText3 = pageData?.commitmentText3;
+
+// ギャラリー画像データ
+const atmosphereImageLarge = pageData?.atmosphereImageLarge?.url || "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1000&q=80";
+const atmosphereImageSmall = pageData?.atmosphereImageSmall?.url || "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80";
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}｜HAIR SALON LUMIÈRE（ルミエール）</title>
+  
+  <!-- フォント（Cinzel / Shippori Mincho） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* 下層ページ用 ページヘッダー */
+    .page-header {
+      padding-top: 130px; 
+      padding-bottom: 50px;
+      background-color: #f8f6f2;
+      text-align: center;
+    }
+
+    .page-title-en {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.25em;
+      color: #b39b72;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .page-title-ja {
+      font-size: 0.85rem;
+      color: #777;
+      letter-spacing: 0.12em;
+    }
+
+    /* メインビジュアルエリア（大判画像） */
+    .concept-hero-img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ストーリー・リードセクション */
+    .concept-story-section {
+      padding: 90px 0 70px;
+      background-color: #fff;
+    }
+
+    .concept-story-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .concept-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      color: #b39b72;
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .concept-main-title {
+      font-size: 1.9rem;
+      font-weight: 600;
+      line-height: 1.8;
+      margin-bottom: 40px;
+      color: #1a1a1a;
+      letter-spacing: 0.05em;
+      white-space: pre-wrap;
+    }
+
+    .concept-main-title-wrap h2 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      line-height: 1.8;
+      margin-bottom: 40px;
+      color: #1a1a1a;
+      letter-spacing: 0.05em;
+    }
+
+    .concept-story-text {
+      font-size: 0.95rem;
+      line-height: 2.3;
+      color: #555;
+      text-align: justify;
+      text-justify: inter-ideograph;
+    }
+
+    /* MicroCMSから読み込んだリッチテキスト用のスタイル調整 */
+    .concept-cms-content {
+      font-size: 0.95rem;
+      line-height: 2.3;
+      color: #555;
+      text-align: left;
+    }
+    .concept-cms-content p {
+      margin-bottom: 1.5em;
+    }
+
+    /* 3つのこだわり：縦並び＋大きな背景ナンバー */
+    .concept-value-section {
+      padding: 80px 0 100px;
+      background-color: #fdfbf7;
+      border-top: 1px solid #f0ece1;
+    }
+
+    .section-headline-wrap {
+      text-align: center;
+      margin-bottom: 70px;
+    }
+
+    .section-headline-en {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      color: #1a1a1a;
+      letter-spacing: 0.15em;
+    }
+
+    .value-cards-wrap {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+
+    .value-card {
+      background: #fff;
+      padding: 45px 30px;
+      border-radius: 6px;
+      border: 1px solid #eae5dc;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .value-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+    }
+
+    .value-num {
+      font-family: 'Cinzel', serif;
+      font-size: 2.8rem;
+      color: #e5dfd3;
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .value-card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.6;
+      color: #1a1a1a;
+      margin-bottom: 18px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #b39b72;
+      white-space: pre-wrap;
+    }
+
+    .value-card-text {
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: #666;
+    }
+
+    /* リッチテキスト表示用スタイル補正 */
+    .value-card-text :global(p) {
+      margin-bottom: 0.8em;
+    }
+    .value-card-text :global(p:last-child) {
+      margin-bottom: 0;
+    }
+
+    /* メニュー紹介・バナー表示エリア */
+    .menu-intro-section {
+      padding: 60px 0;
+      background-color: #fff;
+    }
+    .menu-banner-wrap {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .menu-banner-wrap img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    /* ビジュアルギャラリー */
+    .atmosphere-section {
+      padding: 90px 0;
+      background-color: #fff;
+    }
+
+    .atmosphere-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .atmosphere-img-large img,
+    .atmosphere-img-small img {
+      width: 100%;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .atmosphere-img-large img {
+      height: 450px;
+    }
+
+    .atmosphere-img-small img {
+      height: 350px;
+    }
+
+    /* TOPに戻るボタンエリア */
+    .back-home-wrap {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 40px;
+      background-color: #1a1a1a;
+      color: #fff;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      transition: all 0.3s ease;
+    }
+
+    .back-home-btn:hover {
+      background-color: #b39b72;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(179, 155, 114, 0.4);
+    }
+
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .page-header {
+        padding-top: 180px; 
+        padding-bottom: 40px;
+      }
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 992px) {
+      .value-cards-wrap {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      .atmosphere-grid {
+        grid-template-columns: 1fr;
+      }
+      .atmosphere-img-large img,
+      .atmosphere-img-small img {
+        height: 280px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        padding-top: 35px;
+        padding-bottom: 30px;
+      }
+      .concept-hero-img {
+        height: 280px;
+      }
+      .concept-main-title {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 固定予約ボタン（右下） -->
+  <a href={import.meta.env.BASE_URL + '#reservation'} class="fixed-reserve-btn">
+    <span class="btn-en">WEB RESERVATION</span>
+    <span class="btn-ja">ご予約はこちら</span>
+  </a>
+
+  <!-- ヘッダー呼び出し（CONCEPT指定） -->
+  <Header current="concept" />
+
+  <main>
+    <!-- 下層ページ用 ページヘッダー -->
+    <section class="page-header">
+      <span class="page-title-en">{title}</span>
+      <p class="page-title-ja">サロンのコンセプトとこだわり</p>
+    </section>
+
+    <!-- メインビジュアル写真 -->
+    <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1600&q=80" alt="LUMIERE サロン内観" class="concept-hero-img">
+
+    <!-- ストーリー・リード文章 -->
+    <section class="concept-story-section">
+      <div class="container">
+        <div class="concept-story-inner fade-in">
+          {/* サブタイトル（PHILOSOPHYなど） */}
+          <span class="concept-subtitle">{conceptSubtitle}</span>
+          
+          {/* メインキャッチコピー */}
+          {conceptMainTitle ? (
+            <div class="concept-main-title-wrap" set:html={conceptMainTitle} />
+          ) : (
+            <h2 class="concept-main-title">
+              髪と心に、上質なニュアンスを。<br>
+              あなただけの「心地よさ」に出会う場所。
+            </h2>
+          )}
+
+          {/* コンセプト本文 */}
+          {content ? (
+            <div class="concept-cms-content" set:html={content} />
+          ) : (
+            <p class="concept-story-text">
+              HAIR SALON LUMIÈRE（ルミエール）は、日常の喧騒から少し離れ、心からリラックスしていただくためのプライベートサロンです。<br><br>
+              私たちが大切にしているのは、単に髪を整えることだけではありません。お客様一人ひとりの骨格、髪質、画面のスタイルに寄り添い、時間が経っても崩れにくい「再現性の高いスタイル」と「本来の美しさ」を引き出すこと。<br><br>
+              洗練された空間と丁寧な手仕事で、あなたの毎日にほんのり輝きを添えるお手伝いをいたします。
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <!-- MicroCMS の menuIntroText / menuBannerImage が登録されていれば表示 -->
+    {(menuIntroText || menuBannerImage) && (
+      <section class="menu-intro-section">
+        <div class="container">
+          {menuIntroText && (
+            <div class="concept-cms-content" set:html={menuIntroText} />
+          )}
+          {menuBannerImage && (
+            <div class="menu-banner-wrap">
+              <img 
+                src={menuBannerImage.url} 
+                alt="メニューバナー" 
+                width={menuBannerImage.width} 
+                height={menuBannerImage.height} 
+              />
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+
+    <!-- 3つのこだわり (OUR COMMITMENT) -->
+    <section class="concept-value-section">
+      <div class="container">
+        <div class="section-headline-wrap fade-in">
+          <h3 class="section-headline-en">{commitmentmainTitle}</h3>
+        </div>
+
+        <div class="value-cards-wrap">
+          <!-- こだわり 01 -->
+          <div class="value-card fade-in">
+            <span class="value-num">01</span>
+            <h4 class="value-card-title">
+              {commitmentTitle1 || "マンツーマンによる\n丁寧なカウンセリング"}
+            </h4>
+            <div class="value-card-text">
+              {commitmentText1 ? (
+                <div set:html={commitmentText1} />
+              ) : (
+                <p>最初から仕上げまで一人のスタイリストが責任を持って担当。髪のお悩みや理想のイメージを細やかに汲み取り、最適なプランをご提案します。</p>
+              )}
+            </div>
+          </div>
+
+          <!-- こだわり 02 -->
+          <div class="value-card fade-in">
+            <span class="value-num">02</span>
+            <h4 class="value-card-title">
+              {commitmentTitle2 || "髪と地肌に優しい\n厳選オーガニック薬剤"}
+            </h4>
+            <div class="value-card-text">
+              {commitmentText2 ? (
+                <div set:html={commitmentText2} />
+              ) : (
+                <p>数年後も健やかで美しい髪を保つため、ダメージを抑えたオーガニックカラーや高濃度トリートメントを厳選して使用しています。</p>
+              )}
+            </div>
+          </div>
+
+          <!-- こだわり 03 -->
+          <div class="value-card fade-in">
+            <span class="value-num">03</span>
+            <h4 class="value-card-title">
+              {commitmentTitle3 || "五感で解き放たれる\n上質なプライベート空間"}
+            </h4>
+            <div class="value-card-text">
+              {commitmentText3 ? (
+                <div set:html={commitmentText3} />
+              ) : (
+                <p>落ち着いたインテリア、心地よいBGM、香りに至るまでこだわり抜いた空間で、日常を忘れる穏やかな時間をお過ごしいただけます。</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- サロン空間の雰囲気を伝えるギャラリー風セクション -->
+    <section class="atmosphere-section">
+      <div class="container">
+        <div class="atmosphere-grid fade-in">
+          <div class="atmosphere-img-large">
+            <img src={atmosphereImageLarge} alt="サロン雰囲気 大画像">
+          </div>
+          <div class="atmosphere-img-small">
+            <img src={atmosphereImageSmall} alt="サロン雰囲気 小画像">
+          </div>
+        </div>
+
+        <!-- TOPへ戻る導線 -->
+        <div class="back-home-wrap">
+          <a href={import.meta.env.BASE_URL} class="back-home-btn">
+            ‹ TOPページへ戻る
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- トップへ戻るボタン -->
+  <a href="#" id="scrollTopBtn" class="scroll-top-btn" aria-label="ページトップへ戻る">↑</a>
+
+  <!-- フッター呼び出し（CONCEPT指定） -->
+  <Footer current="concept" />
+
+  <!-- 共通JSの読み込み -->
+  <script src="../scripts/main.js"></script>
+</body>
+</html>

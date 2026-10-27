@@ -1,0 +1,339 @@
+---
+import '../styles/style.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { client } from '../library/microcms';
+
+// pages APIから pageId が reservation のデータを取得
+const reservationData = await client.get({
+  endpoint: 'pages',
+  queries: { filters: 'pageId[equals]reservation' },
+}).then(res => res.contents[0]).catch(() => null);
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RESERVATION & CONTACT｜HAIR SALON LUMIÈRE（ルミエール）</title>
+  
+  <!-- フォント（Cinzel / Shippori Mincho） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       RESERVATION & CONTACT ページ専用デザイン
+       ========================================== */
+    .page-header {
+      padding-top: 140px;
+      padding-bottom: 50px;
+      background-color: #f8f6f2;
+      text-align: center;
+    }
+
+    .page-title-en {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.25em;
+      color: #b39b72;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .page-title-ja {
+      font-size: 0.85rem;
+      color: #777;
+      letter-spacing: 0.12em;
+    }
+
+    /* メインセクション全体の余白設定 */
+    .reservation-page-section {
+      padding: 70px 0;
+    }
+
+    .reservation-lead {
+      display: inline-block;
+      text-align: left;
+      margin-bottom: 30px;
+    }
+
+    /* 親要素の中央寄せ */
+    .reservation-container {
+      text-align: center;
+    }
+
+    /* TOPに戻るボタンエリア */
+    .back-home-wrap {
+      text-align: center;
+      padding: 50px 0 20px;
+    }
+
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 40px;
+      background-color: #1a1a1a;
+      color: #fff;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .back-home-btn:hover {
+      background-color: #b39b72;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(179, 155, 114, 0.4);
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 1024px) {
+      .page-header {
+        padding-top: 180px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        padding-top: 100px;
+        padding-bottom: 30px;
+      }
+      .reservation-page-section {
+        padding: 40px 0 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー（RESERVATION指定） -->
+  <Header current="reservation" />
+
+  <main>
+    <!-- 下層ページ用 ページヘッダー -->
+    <section class="page-header">
+      <span class="page-title-en">RESERVATION & CONTACT</span>
+      <p class="page-title-ja">ご予約・お問い合わせ</p>
+    </section>
+
+<!-- 予約メインコンテンツ -->
+    <section class="reservation-page-section">
+      <div class="container reservation-container">
+        
+        <div class="reservation-lead">
+          {reservationData?.reservationLead ? (
+            <Fragment set:html={reservationData.reservationLead} />
+          ) : (
+            <p>
+              当サロンは事前予約優先制となっております。<br>
+              WEB予約（24時間受付）または公式LINEよりお気軽にご予約・ご相談ください。
+            </p>
+          )}
+        </div>
+
+        <!-- 1. 予約ボタンエリア（ホットペッパー / LINE） -->
+        <div class="reserve-btn-group">
+          <a href={reservationData?.hotpepperUrl || "https://beauty.hotpepper.jp/"} target="_blank" rel="noopener noreferrer" class="reserve-btn web-btn">
+            <span class="btn-sub">24時間即時確定</span>
+            <span class="btn-main">WEBで予約する</span>
+          </a>
+
+          <a href={reservationData?.lineUrl || "https://line.me/"} target="_blank" rel="noopener noreferrer" class="reserve-btn line-btn">
+            <span class="btn-sub">事前相談・かんたん予約</span>
+            <span class="btn-main">LINEで予約・相談</span>
+          </a>
+        </div>
+
+        <!-- 2. 電話予約エリア -->
+        <div class="reservation-tel-info" style="margin-top: 40px; text-align: center;">
+          <p style="font-size: 1rem; margin-bottom: 8px; font-weight: 600; color: #1a1a1a;">お電話でのご予約・お問い合わせ</p>
+          <p style="font-size: 1.8rem; font-family: 'Cinzel', serif; font-weight: 600; margin-bottom: 5px;">
+            <a href={`tel:${(reservationData?.telNumber || "03-1234-5678").replace(/-/g, '')}`} class="tel-link" style="color: #1a1a1a; text-decoration: none;">
+              {reservationData?.telNumber || "03-1234-5678"}
+            </a>
+          </p>
+          <p style="font-size: 0.85rem; color: #666;">
+            受付時間：{reservationData?.telHours || "10:00〜19:00（定休日：毎週火曜 / 第2・第3月曜）"}
+          </p>
+        </div>
+
+        <!-- 区切り線 -->
+        <hr style="border: none; border-top: 1px solid #eae5dc; margin: 60px 0;">
+
+        <!-- 3. メールお問い合わせフォーム（GAS連携） -->
+        <div class="contact-form-wrapper" style="max-width: 680px; margin: 0 auto; text-align: left;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="font-size: 1.4rem; font-weight: 600; color: #1a1a1a; margin-bottom: 10px;">メールでお問い合わせ</h2>
+            {reservationData?.contactFormNotice ? (
+              <div style="font-size: 0.9rem; color: #666; line-height: 1.6;">
+                <Fragment set:html={reservationData.contactFormNotice} />
+              </div>
+            ) : (
+              <p style="font-size: 0.9rem; color: #666; line-height: 1.6;">
+                ご質問やご相談、採用に関するお問い合わせは下記フォームより承っております。<br>
+                ※施術の即時予約は、上記WEB予約またはお電話からお願いいたします。
+              </p>
+            )}
+          </div>
+
+          <!-- 送信完了メッセージエリア -->
+          <div id="formResponse" style="display: none; padding: 25px; background-color: #f7f9f6; border: 1px solid #b39b72; border-radius: 6px; text-align: center; margin-bottom: 30px;">
+            <p style="font-weight: bold; color: #1a1a1a; font-size: 1.1rem; margin-bottom: 8px;">お問い合わせを送信いたしました。</p>
+            <p style="font-size: 0.88rem; color: #555;">内容を確認後、担当者よりご連絡させていただきますので今しばらくお待ちください。</p>
+          </div>
+
+          <!-- お問い合わせフォーム本体 -->
+          <form id="contactForm" class="contact-form">
+            <div style="margin-bottom: 20px;">
+              <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333;">お名前 <span style="color: #d9534f;">*</span></label>
+              <input type="text" id="name" name="name" required style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;" placeholder="例：山田 太郎">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label for="tel" style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333;">電話番号 <span style="color: #d9534f;">*</span></label>
+              <input type="tel" id="tel" name="tel" required style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;" placeholder="例：090-1234-5678">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label for="email" style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333;">メールアドレス <span style="color: #d9534f;">*</span></label>
+              <input type="email" id="email" name="email" required style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;" placeholder="例：sample@example.com">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label for="category" style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333;">お問い合わせ種別</label>
+              <select id="category" name="category" style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; background: #fff; box-sizing: border-box;">
+                <option value="ご予約・施術について">ご予約・施術に関するご相談</option>
+                <option value="髪のお悩み・事前相談">カウンセリング・事前相談</option>
+                <option value="採用について">採用・リクルートについて</option>
+                <option value="その他">その他のお問い合わせ</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+              <label for="message" style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333;">お問い合わせ内容 <span style="color: #d9534f;">*</span></label>
+              <textarea id="message" name="message" rows="6" required style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;" placeholder="ご相談内容をご記入ください。"></textarea>
+            </div>
+
+            <div style="text-align: center;">
+              <button type="submit" id="submitBtn" style="background: #1a1a1a; color: #fff; border: none; padding: 16px 50px; font-size: 1rem; border-radius: 30px; cursor: pointer; transition: background 0.3s;">送信する</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 4. 注意事項・ご案内 -->
+        <div class="reservation-notes" style="margin-top: 60px; text-align: left; background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #eae5dc;">
+          <h3 style="font-size: 1.05rem; margin-bottom: 15px; color: #1a1a1a; border-bottom: 1px solid #f0ece1; padding-bottom: 8px;">ご予約・ご来店に関するご案内</h3>
+          {reservationData?.reservationNotes ? (
+            <div style="font-size: 0.88rem; line-height: 1.9; color: #555;">
+              <Fragment set:html={reservationData.reservationNotes} />
+            </div>
+          ) : (
+            <ul style="font-size: 0.88rem; line-height: 1.9; color: #555; padding-left: 20px;">
+              <li>当日のご予約やお急ぎの場合は、お電話にてお問い合わせいただけますとスムーズです。</li>
+              <li>施術中はお電話に出られない場合がございます。折り返しご連絡いたしますのでご了承ください。</li>
+              <li>ご予約の変更・キャンセルは、前日までにWEBまたはお電話・LINEにてご連絡をお願いいたします。</li>
+            </ul>
+          )}
+        </div>
+
+        <!-- TOPへ戻る導線 -->
+        <div class="back-home-wrap">
+          <a href="/" class="back-home-btn">‹ TOPページへ戻る</a>
+        </div>
+
+      </div>
+    </section>
+    
+  </main>
+
+  <!-- トップへ戻るボタン -->
+  <a href="#" id="scrollTopBtn" class="scroll-top-btn" aria-label="ページトップへ戻る">↑</a>
+
+  <!-- フッター（RESERVATION指定） -->
+  <Footer current="reservation" />
+
+  <!-- JSスクリプト -->
+  <script is:inline>
+    // フェードインアニメーション
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
+
+    // Topに戻るボタン制御
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add('is-active');
+        } else {
+          scrollTopBtn.classList.remove('is-active');
+        }
+      });
+
+      scrollTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // お問い合わせフォーム送信処理（GAS doPost連携）
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzqvjta3C7i1wECo7TTx-CaldEfXNaQW4K3K8OkY6Dd7q4zdLhW8L6A2hkRZr3yOIJ6qA/exec";
+
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+      contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "送信中...";
+
+        // フォームデータの作成
+        const formData = new URLSearchParams();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('tel', document.getElementById('tel').value);
+        formData.append('email', document.getElementById('email').value);
+        formData.append('category', document.getElementById('category').value);
+        formData.append('message', document.getElementById('message').value);
+
+        // GASへPOST送信
+        fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: formData.toString()
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (result.status === 'success') {
+            contactForm.style.display = 'none';
+            document.getElementById('formResponse').style.display = 'block';
+          } else {
+            alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
+            submitBtn.disabled = false;
+            submitBtn.innerText = "送信する";
+          }
+        })
+        .catch(error => {
+          console.error('送信エラー:', error);
+          alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
+          submitBtn.disabled = false;
+          submitBtn.innerText = "送信する";
+        });
+      });
+    }
+  </script>
+</body>
+</html>

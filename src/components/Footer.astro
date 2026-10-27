@@ -1,0 +1,92 @@
+---
+import { client } from '../library/microcms';
+
+interface Props {
+  current?: string;
+  isHome?: boolean;
+}
+
+const { current = '', isHome = false } = Astro.props;
+
+// pages APIから pageId が common のデータを取得
+const commonData = await client.get({
+  endpoint: 'pages',
+  queries: { filters: 'pageId[equals]common' },
+}).then(res => res.contents[0]).catch(() => null);
+
+const getLink = (anchor: string, path: string) => {
+  if (isHome) {
+    return `#${anchor}`;
+  }
+
+  if (anchor === 'access' || anchor === 'reservation') {
+    return `${import.meta.env.BASE_URL}#${anchor}`;
+  }
+
+  return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+};
+
+---
+
+<footer class="footer">
+  <div class="container footer-container">
+    <div class="footer-brand">
+      <span class="footer-logo">{commonData?.shopName || "HAIR SALON LUMIÈRE"}</span>
+      <p class="footer-sub">{commonData?.shopSub || "上質な空間と似合わせ技術を提供するプライベートサロン"}</p>
+    </div>
+
+    <div class="footer-info">
+      <p class="footer-info-item"><span>ADDRESS</span><span>：{commonData?.address || "〒107-0062 東京都港区南青山 0-0-0"}</span></p>
+      <p class="footer-info-item"><span>TEL</span><span>：<a href={`tel:${(commonData?.telNumber2 || "03-1234-5678").replace(/-/g, '')}`}>{commonData?.telNumber2 || "03-1234-5678"}</a></span></p>
+      <p class="footer-info-item"><span>OPEN</span><span>：{commonData?.openHours || "10:00 - 20:00（最終受付 19:00）"}</span></p>
+      <p class="footer-info-item"><span>CLOSED</span><span>：{commonData?.closedDays || "毎週火曜日 / 第2・第3月曜日"}</span></p>
+    </div>
+
+    <ul class="footer-nav">
+      <li>
+        {current === 'concept' ? (
+          <a class="active-concept" style="color: #b39b72; font-weight: 600; cursor: default;">CONCEPT</a>
+        ) : (
+          <a href={getLink('concept', '')}>CONCEPT</a>
+        )}
+      </li>
+      <li>
+        {current === 'staff' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">STAFF</a>
+        ) : (
+          <a href={getLink('staff', '')}>STAFF</a>
+        )}
+      </li>
+      <li>
+        {current === 'gallery' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">GALLERY</a>
+        ) : (
+          <a href={getLink('gallery', '')}>GALLERY</a>
+        )}
+      </li>
+      <li>
+        {current === 'menu' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">MENU</a>
+        ) : (
+          <a href={getLink('menu', '')}>MENU</a>
+        )}
+      </li>
+      <li>
+        {current === 'news' ? (
+          <a style="color: #b39b72; font-weight: 600; cursor: default;">NEWS</a>
+        ) : (
+          <a href={getLink('news', '')}>NEWS</a>
+        )}
+      </li>
+      <li><a href={getLink('reservation', '')}>RESERVATION</a></li>
+<li><a href={getLink('access', '')}>ACCESS</a></li>
+    </ul>
+
+    <div class="footer-sns">
+      <a href={commonData?.instagramUrl || "https://www.instagram.com/"} target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>
+      <a href={commonData?.lineUrl2 || "https://line.me/"} target="_blank" rel="noopener" aria-label="LINE">LINE</a>
+    </div>
+
+    <p class="copyright">&copy; {commonData?.shopName || "HAIR SALON LUMIÈRE"}. All Rights Reserved.</p>
+  </div>
+</footer>

@@ -1,0 +1,640 @@
+---
+import '../styles/style.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Layout from '../layouts/Layout.astro';
+import { client, type StaffItem } from '../library/microcms';
+
+// トップページ用に最新3件のお知らせを取得
+const response = await client.get({
+  endpoint: "news",
+  queries: {
+    orders: "-publishedAtCustom",
+    limit: 3,
+  },
+});
+const newsList = response.contents;
+
+// TOPページ用に最新3件のギャラリーを取得
+const galleryResponse = await client.get({
+  endpoint: "gallery",
+  queries: {
+    limit: 100,
+    orders: "-updatedAt",
+  },
+});
+
+const topGalleryList = galleryResponse.contents
+  .filter((item: any) => item.isTop === true)
+  .slice(0, 3); // ← ここで最大3件に制限（6件にしたい場合は .slice(0, 6) ）
+
+
+// TOPページ用に表示したいメニューを取得
+const menuResponse = await client.get({
+  endpoint: "menu",
+  queries: {
+    limit: 100,
+    orders: "sortOrder",
+  },
+});
+
+// isTop が true の厳選メニューのみを抽出し、最大5件に制限
+const topMenuList = menuResponse.contents
+  .filter((item: any) => item.isTop === true)
+  .slice(0, 5);
+
+// pages APIから pageId が top のデータを取得
+const topPageData = await client.get({
+  endpoint: 'pages',
+  queries: { filters: 'pageId[equals]top' },
+}).then(res => res.contents[0]).catch(() => null);
+
+// pages APIから pageId が concept のデータを取得
+const conceptPageData = await client.get({
+  endpoint: 'pages',
+  queries: { filters: 'pageId[equals]concept' },
+}).then(res => res.contents[0]).catch(() => null);
+
+// STAFF（オーナー・代表者）情報を取得
+
+const staffResponse = await client.get({
+  endpoint: "staff",
+  queries: {
+    limit: 1,
+    orders: "sortOrder",
+  },
+});
+const topStaff = staffResponse.contents[0];
+
+
+// pages APIから pageId が reservation のデータを取得
+const reservationPageData = await client.get({
+  endpoint: 'pages',
+  queries: { filters: 'pageId[equals]reservation' },
+}).then(res => res.contents[0]).catch(() => null);
+
+
+// pages APIから pageId が common のデータを取得（フッターおよびACCESS共通）
+const commonData = await client.get({
+  endpoint: 'pages',
+  queries: { filters: 'pageId[equals]common' },
+}).then(res => res.contents[0]).catch(() => null);
+
+
+// --- 1. カレンダー用の日付準備とmicroCMS（commonData）からの例外データ解析 ---
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth() + 1;
+
+const exceptionMap = {};
+
+if (commonData?.calendarExceptions) {
+  const rawHtml = commonData.calendarExceptions;
+  
+  // 修正：ハイフン・スラッシュだけでなく「2026年10月5日」のような書き方にも対応する正規表現
+  const regex = /(\d{4})[年/-](\d{1,2})[月/-](\d{1,2})日?[^\d<]*([^<]*)/g;
+  let match;
+
+  while ((match = regex.exec(rawHtml)) !== null) {
+    const y = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const d = parseInt(match[3], 10);
+    const text = match[4].trim();
+    
+    // 今月（当月）のデータに絞る
+    if (y === year && m === month) {
+      const isOff = !text.includes('営業'); 
+      
+      exceptionMap[d] = {
+        type: isOff ? 'off' : 'open',
+        title: text
+      };
+    }
+  }
+}
+
+// --- 2. カレンダーの自動生成ロジック（例外対応版） ---
+const firstDayIndex = new Date(year, month - 1, 1).getDay();
+const lastDayDate = new Date(year, month, 0).getDate();
+
+const calendarRows = [];
+let daysInWeek = [];
+
+for (let i = 0; i < firstDayIndex; i++) {
+  daysInWeek.push({ day: '', isOff: false, isCurrentMonth: false });
+}
+
+for (let d = 1; d <= lastDayDate; d++) {
+  const currentLoopDate = new Date(year, month - 1, d);
+  const dayOfWeek = currentLoopDate.getDay(); 
+  const dateNum = currentLoopDate.getDate();
+
+  // 月曜日(1)の場合、何回目の月曜日かを計算する（例: 1〜7日は第1、8〜14日は第2...）
+  const weekNumber = Math.ceil(dateNum / 7);
+
+  // 基本の定休日判定：毎週月曜日(1) を定休日とする
+  let isOffDay = (dayOfWeek === 1); 
+
+  // microCMSから取得した例外データ（臨時休業・臨時営業）があれば上書き
+  if (exceptionMap[d]) {
+    if (exceptionMap[d].type === 'off') {
+      isOffDay = true;  
+    } else if (exceptionMap[d].type === 'open') {
+      isOffDay = false; 
+    }
+  }
+
+  daysInWeek.push({
+    day: d,
+    isOff: isOffDay,
+    isSun: dayOfWeek === 0,
+    isSat: dayOfWeek === 6,
+    isCurrentMonth: true
+  });
+
+  if (daysInWeek.length === 7) {
+    calendarRows.push(daysInWeek);
+    daysInWeek = [];
+  }
+}
+
+
+if (daysInWeek.length > 0) {
+  while (daysInWeek.length < 7) {
+    daysInWeek.push({ day: '', isOff: false, isCurrentMonth: false });
+  }
+  calendarRows.push(daysInWeek);
+}
+
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAIR SALON LUMIÈRE（ルミエール）</title>
+  
+  <!-- フォント（英文：Cinzel / 和文：Shippori Mincho） -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- 1. 軽量オープニングアニメーション（初回訪問時のみ） -->
+  <div id="opening" class="opening">
+    <div class="opening-logo">LUMIÈRE</div>
+  </div>
+
+  <!-- 固定予約ボタン（スマホ・PC共通） -->
+  <a href="#reservation" class="fixed-reserve-btn">
+    <span class="btn-en">WEB RESERVATION</span>
+    <span class="btn-ja">ご予約はこちら</span>
+  </a>
+ 
+  <!-- Header -->
+  <Header isHome={true} headerTitle={commonData?.headerTitle} />
+
+  <main>
+    <!-- 2. メインビジュアル -->
+    <section class="hero">
+      <div class="hero-text-wrap">
+        <p class="hero-catch"><Fragment set:html={topPageData?.heroCatch || "髪と心に、<br>上質なニュアンスを。"} /></p>
+        <p class="hero-sub">{topPageData?.heroSub || "PRIVATE HAIR SALON"}</p>
+      </div>
+
+      <div class="carousel">
+        <div class="carousel-slides">
+          {topPageData?.heroImages && topPageData.heroImages.length > 0 ? (
+            topPageData.heroImages.map((item: any, index: number) => (
+              <div class={`slide ${index === 0 ? 'active' : ''}`}>
+                <img src={item.image?.url} alt={`サロンメイン画像 ${index + 1}`} />
+              </div>
+            ))
+          ) : (
+            <div class="slide active">
+              <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1600&q=80" alt="サロン内観">
+            </div>
+          )}
+        </div>
+
+        <!-- 左右矢印コントロール -->
+        <button class="carousel-arrow prev" id="prevBtn" aria-label="前の画像へ">‹</button>
+        <button class="carousel-arrow next" id="nextBtn" aria-label="次の画像へ">›</button>
+
+        <!-- 下部ドットインジケーター -->
+        <div class="carousel-dots" id="dotsContainer">
+          {topPageData?.heroImages && topPageData.heroImages.length > 0 ? (
+            topPageData.heroImages.map((_, index: number) => (
+              <button class={`dot ${index === 0 ? 'active' : ''}`} data-index={index}></button>
+            ))
+          ) : (
+            <button class="dot active" data-index="0"></button>
+          )}
+        </div>
+      </div>
+    </section>
+
+<!-- 3. CONCEPT -->
+<section id="concept" class="section concept-section fade-in">
+  <div class="container concept-container">
+    
+    <!-- テキストコンテンツ一式 -->
+    <div class="concept-content-card">
+      <span class="section-en">CONCEPT</span>
+      
+      <h2 class="section-title concept-title">
+        {conceptPageData?.conceptMainTitle ? (
+          <Fragment set:html={conceptPageData.conceptMainTitle} />
+        ) : (
+          <>素材の美しさを引き出す、<br />完全プライベート空間</>
+        )}
+      </h2>
+
+      <!-- スマホ表示時のみタイトルの下に表示される画像 -->
+      <div class="concept-image-wrap concept-image-sp">
+        <img 
+          src={conceptPageData?.atmosphereImageLarge?.url || "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80"} 
+          alt="サロンの温かみのある風景" 
+          class="concept-img"
+        />
+      </div>
+
+      <div class="concept-text concept-text-clamp">
+        {topPageData?.conceptTopText ? (
+          <Fragment set:html={topPageData.conceptTopText} />
+        ) : conceptPageData?.content ? (
+          <Fragment set:html={conceptPageData.content} />
+        ) : (
+          <p>
+            HAIR SALON LUMIÈRE（ルミエール）は、日常の喧騒から少し離れ、心からリラックスしていただくためのプライベートサロンです。<br />
+            一人ひとりのお客様と誠実に向き合い、骨格や髪質に合わせたオーダーメイドのスタイルをご提案します。
+          </p>
+        )}
+      </div>
+
+      <div class="concept-btn-wrap">
+        <a href={import.meta.env.BASE_URL + 'concept/'} class="concept-more-btn">
+          <span class="btn-text-en">VIEW MORE</span>
+          <span class="btn-text-ja">詳しく見る</span>
+          <span class="arrow">›</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- PC表示時用の右側画像 -->
+    <div class="concept-image-wrap concept-image-pc">
+      <img 
+        src={conceptPageData?.atmosphereImageLarge?.url || "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80"} 
+        alt="サロンの温かみのある風景" 
+        class="concept-img"
+      />
+    </div>
+
+  </div>
+</section>
+
+    <!-- 4. STAFF -->
+    <section id="staff" class="section staff-section fade-in">
+      <div class="container">
+        <div class="staff-container">
+          <div class="staff-content-card">
+            <span class="section-en">STAFF</span>
+            <h2 class="staff-title">
+              {topStaff ? `${topStaff.post} / ${topStaff.nameJa}` : 'オーナー美容師 / 兼松 葵'}
+            </h2>
+            <p class="staff-text">
+              {topStaff?.message ? (
+                topStaff.message.split('\n').map((line, idx) => (
+                  <span key={idx}>
+                    {line}
+                    <br />
+                  </span>
+                ))
+              ) : (
+                <>
+                  表参道の大型サロンで12年間のキャリアを積み、プライベートサロン「LUMIÈRE」をオープン。<br /><br />
+                  「ショート・ボブの似合わせカット」と「髪質改善オーガニックカラー」を得意とし、お客様一人ひとりの髪質や骨格に合わせた再現性の高いスタイルをご提案します。
+                </>
+              )}
+            </p>
+
+            <div class="staff-btn-wrap">
+              <a href={import.meta.env.BASE_URL + 'staff/'} class="staff-more-btn">
+                <span class="btn-text-en">VIEW MORE</span>
+                <span class="btn-text-ja">詳しいプロフィールを見る</span>
+                <span class="arrow">›</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="staff-image-wrap">
+            <img 
+              src={topStaff?.profileImage?.url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80"} 
+              alt={topStaff ? `${topStaff.post} ${topStaff.nameJa}` : "オーナー美容師 兼松 葵"} 
+              class="staff-img" 
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. GALLERY -->
+    <section id="gallery" class="section gallery-section fade-in">
+      <div class="container">
+        <span class="section-en">GALLERY</span>
+        <h2 class="section-title">スタイルギャラリー</h2>
+        <p class="gallery-lead">写真をクリックすると角度（正面・横・後ろ）が切り替わります</p>
+
+        <div class="gallery-grid">
+          {topGalleryList && topGalleryList.length > 0 ? (
+            topGalleryList.map((item) => {
+              const angles = (item.images || []).map((img: any) => {
+                let url = '';
+                if (img?.src?.url) url = img.src.url;
+                else if (typeof img?.src === 'string') url = img.src;
+                else if (img?.url) url = img.url;
+                
+                return {
+                  src: url,
+                  label: img?.label || 'FRONT'
+                };
+              }).filter((a: any) => a.src !== '');
+
+              const defaultSrc = angles.length > 0 ? angles[0].src : '';
+              const defaultLabel = angles.length > 0 ? angles[0].label : 'FRONT';
+
+              return (
+                <div class="gallery-card">
+                  <div class="gallery-img-box">
+                    <span class="angle-badge">{defaultLabel}</span>
+                    {defaultSrc ? (
+                      <img 
+                        src={defaultSrc} 
+                        data-angles={JSON.stringify(angles)} 
+                        data-index="0" 
+                        alt={item.styleName || 'スタイル画像'} 
+                      />
+                    ) : (
+                      <div class="no-image">No Image</div>
+                    )}
+                  </div>
+                  <div class="gallery-info">
+                    <p class="style-name">{item.styleName}</p>
+                    <p class="style-menu">{item.styleMenu}</p>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p>スタイル情報がありません。</p>
+          )}
+        </div>
+
+        <div class="gallery-btn-wrap">
+          <a href={import.meta.env.BASE_URL + 'gallery/'} class="gallery-more-btn">
+            <span class="btn-text-en">VIEW MORE</span>
+            <span class="btn-text-ja">スタイル一覧を見る</span>
+            <span class="arrow">›</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. MENU -->
+    <section id="menu" class="section menu-section fade-in">
+      <div class="container menu-container">
+        <div class="menu-content-card">
+          <span class="section-en">MENU</span>
+          <h2 class="menu-title">メニュー</h2>
+          <div class="menu-lead" set:html={topPageData?.menuIntroText || "厳選した薬剤と丁寧な施術で、髪本来の美しさを引き出します。"} />
+
+          <div class="menu-group">
+            {topMenuList && topMenuList.length > 0 ? (
+              topMenuList.map((item) => (
+                <div class="menu-row">
+                  <span class="menu-name">{item.title}</span>
+                  <span class="menu-dots"></span>
+                  <span class="menu-price">{item.price}</span>
+                </div>
+              ))
+            ) : (
+              <p>メニュー情報がありません。</p>
+            )}
+          </div>
+
+          <div class="menu-btn-wrap">
+            <a href={import.meta.env.BASE_URL + 'menu/'} class="menu-more-btn">
+              <span class="btn-text-en">VIEW MORE MENU</span>
+              <span class="btn-text-ja">全メニュー・料金を見る</span>
+              <span class="arrow">›</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="menu-image-wrap">
+          <img 
+            src={topPageData?.menuBannerImage?.url || "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"} 
+            alt="サロン施術風景" 
+            class="menu-img"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. NEWS -->
+    <section id="news" class="section news-section fade-in">
+      <div class="container news-container">
+        <span class="section-en">NEWS</span>
+        <h2 class="section-title">お知らせ</h2>
+
+        <div class="news-list">
+          {newsList && newsList.length > 0 ? (
+            newsList.map((item, index) => {
+              const rawDate = item.publishedAtCustom || item.publishedAt;
+              const dateObj = new Date(rawDate);
+              const formattedDate = `${dateObj.getFullYear()}.${String(dateObj.getMonth() + 1).padStart(2, '0')}.${String(dateObj.getDate()).padStart(2, '0')}`;
+
+              return (
+                <article class="news-item">
+                  <a href={`/news/#news-${index + 1}`} class="news-item-link" style="display:flex; align-items:center; gap:24px; width:100%;">
+                    <div class="news-thumb">
+                      {item.thumbnail ? (
+                        <img src={item.thumbnail.url} alt={item.title} />
+                      ) : (
+                        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=300&q=80" alt={item.title} />
+                      )}
+                    </div>
+                    
+                    <div class="news-content">
+                      <div class="news-meta">
+                        <span class="news-date">{formattedDate}</span>
+                        {item.category && <span class="news-category">{item.category}</span>}
+                      </div>
+                      <p class="news-text">{item.title}</p>
+                    </div>
+                  </a>
+                </article>
+              );
+            })
+          ) : (
+            <p>現在お知らせはありません。</p>
+          )}
+        </div>
+
+        <div class="news-btn-wrap">
+          <a href={import.meta.env.BASE_URL + 'news/'} class="news-more-btn">
+            <span class="btn-text-en">VIEW MORE NEWS</span>
+            <span class="btn-text-ja">お知らせ一覧を見る</span>
+            <span class="arrow">›</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+ <!-- 8. RESERVATION -->
+<section id="reservation" class="section reservation-section fade-in">
+  <div class="container reservation-container">
+    <span class="section-en">RESERVATION</span>
+    <h2 class="section-title">ご予約・お問い合わせ</h2>
+    
+    <div class="reservation-lead">
+      {reservationPageData?.reservationLead ? (
+        <Fragment set:html={reservationPageData.reservationLead} />
+      ) : (
+        <p>
+          当サロンは事前予約優先制となっております。<br>
+          WEB予約（24時間受付）または公式LINEよりお気軽にご予約ください。
+        </p>
+      )}
+    </div>
+
+    <div class="reserve-btn-group">
+      <!-- WEB予約ボタン（デフォルトURLとピンク対応） -->
+      <a href={reservationPageData?.hotpepperUrl || "https://beauty.hotpepper.jp/"} target="_blank" rel="noopener noreferrer" class="reserve-btn web-btn">
+        <span class="btn-sub">24時間即時確定</span>
+        <span class="btn-main">WEBで予約する</span>
+      </a>
+
+      <!-- LINE予約ボタン（デフォルトURL） -->
+      <a href={reservationPageData?.lineUrl || "https://line.me/"} target="_blank" rel="noopener noreferrer" class="reserve-btn line-btn">
+        <span class="btn-sub">事前相談・かんたん予約</span>
+        <span class="btn-main">LINEで予約・相談</span>
+      </a>
+    </div>
+
+    <div class="reservation-tel-info">
+      お電話でのご予約も承っております：<br>
+      <a href={`tel:${(reservationPageData?.telNumber || "03-1234-5678").replace(/-/g, '')}`} class="tel-link">
+        {reservationPageData?.telNumber || "03-1234-5678"}
+      </a>
+      （{reservationPageData?.telHours || "10:00〜19:00"}）
+    </div>
+
+    <div class="contact-sub-wrap" style="margin-top: 20px;">
+      <a href=DIL5reservation/#contactForm\}` class="contact-sub-btn" style="color: #b39b72; font-size: 0.88rem; text-decoration: underline;">
+        ✉ メールでのお問い合わせ・事前ご相談はこちら ＞
+      </a>
+    </div>
+  </div>
+</section>
+
+    <!-- 9. ACCESS & CALENDAR -->
+    <section id="access" class="section access-section fade-in">
+      <div class="container">
+        
+        <div class="section-title-wrap">
+          <span class="section-en">ACCESS & CALENDAR</span>
+          <h2 class="section-title">店舗情報・アクセス</h2>
+        </div>
+
+<div class="access-info-top">
+          <h3 class="shop-name">{commonData?.shopName || "HAIR SALON LUMIÈRE"}</h3>
+          <div class="info-grid">
+            <p class="info-item"><span>ADDRESS</span>{commonData?.address || "〒107-0062 東京都港区南青山 0-0-0"}</p>
+            <p class="info-item">
+              <span>TEL</span>
+              <a href={`tel:${(commonData?.telNumber2 || "03-1234-5678").replace(/-/g, '')}`}>
+                {commonData?.telNumber2 || "03-1234-5678"}
+              </a>
+            </p>
+            <p class="info-item"><span>OPEN</span>{commonData?.openHours || "10:00 - 20:00（最終受付 19:00）"}</p>
+            <p class="info-item"><span>CLOSED</span>{commonData?.closedDays || "毎週火曜日 / 第2・第3月曜日"}</p>
+            <p class="info-item full-width"><span>ROUTE</span>{commonData?.accessRoute || "東京メトロ表参道駅 A1出口より徒歩3分（骨董通り沿い）"}</p>
+          </div>
+        </div>
+
+        <div class="access-bottom-grid">
+          <div class="map-wrapper">
+            <div id="map_container" class="map-container">
+              <iframe 
+                id="access_map_iframe"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.7478071221703!2d139.70889247627448!3d35.6647248312061!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188ca23b32e185%3A0xb35a098858a7f920!2z6KGo44GNavmBkS3pj4A!5e0!3m2!1sja!2sjp!4v1700000000000!5m2!1sja!2sjp" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Google Map">
+              </iframe>
+            </div>
+            <div class="map-link-wrap">
+              <a id="access_map_link" href="https://maps.google.com/?q=表参道駅" target="_blank" rel="noopener noreferrer" class="map-app-link">
+                Googleマップアプリで開く・ルート案内はこちら ↗
+              </a>
+            </div>
+          </div>
+
+          <div class="corkboard-container">
+            <div class="calendar-paper">
+              <div class="calendar-brand">{commonData?.shopName || "HAIR SALON LUMIÈRE"}</div>
+              <div class="calendar-header">
+                <span class="calendar-month">{year}.{String(month).padStart(2, '0')} CALENDAR</span>
+              </div>
+
+              <table class="calendar-table">
+                <thead>
+                  <tr>
+                    <th class="sun">日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th class="sat">土</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calendarRows.map((week) => (
+                    <tr>
+                      {week.map((item) => (
+                        <td
+                          class:list={{
+                            disabled: !item.isCurrentMonth,
+                            off: item.isCurrentMonth && item.isOff,
+                            sun: item.isCurrentMonth && item.isSun && !item.isOff,
+                            sat: item.isCurrentMonth && item.isSat && !item.isOff,
+                          }}
+                        >
+                          {item.day}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+
+              <p class="calendar-note"><span class="mark-off">●</span> 赤い枠と数字の日が定休日です</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- トップへ戻るボタン -->
+  <a href="#" id="scrollTopBtn" class="scroll-top-btn" aria-label="ページトップへ戻る">↑</a>
+
+  <!-- Footer -->
+  <Footer isHome={true} />
+
+  <!-- JavaScript -->
+  <script src="../scripts/main.js"></script>
+
+</body>
+</html>
