@@ -58,6 +58,7 @@ jobs:
 
           const domain = process.env.MICROCMS_SERVICE_DOMAIN?.trim();
           const host = `${domain}.microcms.io`;
+          console.log('HOST_USED:', host);
 
           console.log('SERVICE_DOMAIN_SET:', Boolean(domain));
           console.log('DOMAIN_HAS_WHITESPACE:', /\s/.test(domain ?? ''));
