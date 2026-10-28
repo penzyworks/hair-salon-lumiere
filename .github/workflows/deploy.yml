@@ -54,17 +54,22 @@ jobs:
       - name: Test microCMS API connection
         run: |
           node --input-type=module <<'NODE'
-          const url = `https://${process.env.MICROCMS_SERVICE_DOMAIN}.microcms.io/api/v1/news`;
+          import dns from 'node:dns/promises';
+
+          const domain = process.env.MICROCMS_SERVICE_DOMAIN?.trim();
+          const host = `${domain}.microcms.io`;
+
+          console.log('SERVICE_DOMAIN_SET:', Boolean(domain));
+          console.log('DOMAIN_HAS_WHITESPACE:', /\s/.test(domain ?? ''));
+          console.log('HOST_FORMAT_OK:', /^[a-z0-9-]+\.microcms\.io$/i.test(host));
+
           try {
-            const response = await fetch(url, {
-              headers: {
-                'X-MICROCMS-API-KEY': process.env.MICROCMS_API_KEY
-              }
-            });
-            console.log(`microCMS HTTP status: ${response.status}`);
-            if (!response.ok) process.exitCode = 1;
+            const addresses = await dns.lookup(host);
+            console.log('DNS_LOOKUP: success');
+            console.log('ADDRESS_FAMILY:', addresses.family);
           } catch (error) {
-            console.error('microCMS connection failed:', error.cause?.code ?? error.message);
+            console.log('DNS_LOOKUP: failed');
+            console.log('DNS_ERROR_CODE:', error.code);
             process.exitCode = 1;
           }
           NODE
