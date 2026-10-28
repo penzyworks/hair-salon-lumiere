@@ -51,6 +51,26 @@ jobs:
         env:
           MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
           MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
+      - name: Test microCMS API connection
+        run: |
+          node --input-type=module <<'NODE'
+          const url = `https://${process.env.MICROCMS_SERVICE_DOMAIN}.microcms.io/api/v1/news`;
+          try {
+            const response = await fetch(url, {
+              headers: {
+                'X-MICROCMS-API-KEY': process.env.MICROCMS_API_KEY
+              }
+            });
+            console.log(`microCMS HTTP status: ${response.status}`);
+            if (!response.ok) process.exitCode = 1;
+          } catch (error) {
+            console.error('microCMS connection failed:', error.cause?.code ?? error.message);
+            process.exitCode = 1;
+          }
+          NODE
+        env:
+          MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
+          MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
 
       - name: Build with Astro
         run: npm run build
