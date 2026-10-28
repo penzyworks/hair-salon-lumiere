@@ -40,8 +40,18 @@ jobs:
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Install dependencies
         run: npm install
+
+      - name: Check microCMS environment
+        run: |
+          if [ -n "$MICROCMS_SERVICE_DOMAIN" ]; then echo "SERVICE_DOMAIN_SET=yes"; else echo "SERVICE_DOMAIN_SET=no"; fi
+          if [ -n "$MICROCMS_API_KEY" ]; then echo "API_KEY_SET=yes"; else echo "API_KEY_SET=no"; fi
+        env:
+          MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
+          MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
+
       - name: Build with Astro
         run: npm run build
         env:
