@@ -58,27 +58,12 @@ jobs:
 
           const domain = process.env.MICROCMS_SERVICE_DOMAIN?.trim();
           const host = `${domain}.microcms.io`;
-          console.log(
-  'DOMAIN_MATCHES_EXPECTED:',
-  domain === 'beautysalon'
-);
-
-console.log(
-  'DOMAIN_CONTAINS_MICROCMS_SUFFIX:',
-  domain?.includes('.microcms.io') ?? false
-);
-
-console.log(
-  'DOMAIN_STARTS_WITH_HTTPS:',
-  domain?.startsWith('https://') ?? false
-);
-
-console.log(
-  'DOMAIN_CONTAINS_SLASH:',
-  domain?.includes('/') ?? false
-);
 
           console.log('SERVICE_DOMAIN_SET:', Boolean(domain));
+          console.log('DOMAIN_MATCHES_EXPECTED:', domain === 'beautysalon');
+          console.log('DOMAIN_CONTAINS_MICROCMS_SUFFIX:', domain?.includes('.microcms.io') ?? false);
+          console.log('DOMAIN_STARTS_WITH_HTTPS:', domain?.startsWith('https://') ?? false);
+          console.log('DOMAIN_CONTAINS_SLASH:', domain?.includes('/') ?? false);
           console.log('DOMAIN_HAS_WHITESPACE:', /\s/.test(domain ?? ''));
           console.log('HOST_FORMAT_OK:', /^[a-z0-9-]+\.microcms\.io$/i.test(host));
 
@@ -94,7 +79,6 @@ console.log(
           NODE
         env:
           MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
-          MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
 
       - name: Build with Astro
         run: npm run build
