@@ -6,16 +6,22 @@ import Footer from '../components/Footer.astro';
 // ★ microCMSクライアントと型の読み込み
 import { client, type StaffItem } from "../library/microcms";
 
-// スタッフ一覧を取得（登録順・並び順に合わせて調整可能です）
-const staffResponse = await client.get({
-  endpoint: "staff", // ※microCMSのエンドポイント名が "staff" の場合
-  queries: {
-    limit: 20,
-    orders: "sortOrder", // ★ 追加：数字の小さい順に並べる
-  },
-});
+// スタッフ一覧を取得
+let staffList: StaffItem[] = [];
 
-const staffList: StaffItem[] = staffResponse.contents;
+try {
+  const staffResponse = await client.get({
+    endpoint: "staff",
+    queries: {
+      limit: 20,
+      orders: "sortOrder",
+    },
+  });
+
+  staffList = staffResponse.contents ?? [];
+} catch (error) {
+  console.warn("スタッフ一覧を取得できませんでした。", error);
+}
 ---
 
 <!DOCTYPE html>

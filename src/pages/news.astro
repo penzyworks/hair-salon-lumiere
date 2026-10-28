@@ -7,15 +7,22 @@ import Footer from '../components/Footer.astro';
 import { client } from "../library/microcms";
 
 // APIからお知らせ一覧を取得
-const response = await client.get({
-  endpoint: "news",
-  queries: {
-    orders: "-publishedAtCustom", // 日付の新しい順（降順）
-    limit: 100, // 取得上限
-  },
-});
+let newsList = [];
 
-const newsList = response.contents;
+try {
+  const response = await client.get({
+    endpoint: "news",
+    queries: {
+      orders: "-publishedAtCustom",
+      limit: 100,
+    },
+  });
+
+  newsList = response.contents ?? [];
+} catch (error) {
+  console.warn("お知らせ一覧を取得できませんでした。", error);
+}
+
 ---
 
 <!DOCTYPE html>

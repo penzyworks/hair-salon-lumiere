@@ -6,42 +6,61 @@ import Layout from '../layouts/Layout.astro';
 import { client, type StaffItem } from '../library/microcms';
 
 // トップページ用に最新3件のお知らせを取得
-const response = await client.get({
-  endpoint: "news",
-  queries: {
-    orders: "-publishedAtCustom",
-    limit: 3,
-  },
-});
-const newsList = response.contents;
+let newsList = [];
+
+try {
+  const response = await client.get({
+    endpoint: "news",
+    queries: {
+      orders: "-publishedAtCustom",
+      limit: 3,
+    },
+  });
+
+  newsList = response.contents ?? [];
+} catch (error) {
+  console.warn("お知らせを取得できませんでした。", error);
+}
 
 // TOPページ用に最新3件のギャラリーを取得
-const galleryResponse = await client.get({
-  endpoint: "gallery",
-  queries: {
-    limit: 100,
-    orders: "-updatedAt",
-  },
-});
+let topGalleryList = [];
 
-const topGalleryList = galleryResponse.contents
-  .filter((item: any) => item.isTop === true)
-  .slice(0, 3); // ← ここで最大3件に制限（6件にしたい場合は .slice(0, 6) ）
+try {
+  const galleryResponse = await client.get({
+    endpoint: "gallery",
+    queries: {
+      limit: 100,
+      orders: "-updatedAt",
+    },
+  });
+
+  topGalleryList = (galleryResponse.contents ?? [])
+    .filter((item: any) => item.isTop === true)
+    .slice(0, 3);
+} catch (error) {
+  console.warn("ギャラリーを取得できませんでした。", error);
+}
 
 
 // TOPページ用に表示したいメニューを取得
-const menuResponse = await client.get({
-  endpoint: "menu",
-  queries: {
-    limit: 100,
-    orders: "sortOrder",
-  },
-});
+let topMenuList = [];
 
-// isTop が true の厳選メニューのみを抽出し、最大5件に制限
-const topMenuList = menuResponse.contents
-  .filter((item: any) => item.isTop === true)
-  .slice(0, 5);
+try {
+  const menuResponse = await client.get({
+    endpoint: "menu",
+    queries: {
+      limit: 100,
+      orders: "sortOrder",
+    },
+  });
+
+  topMenuList = (menuResponse.contents ?? [])
+    .filter((item: any) => item.isTop === true)
+    .slice(0, 5);
+} catch (error) {
+  console.warn("メニューを取得できませんでした。", error);
+}
+
 
 // pages APIから pageId が top のデータを取得
 const topPageData = await client.get({
@@ -57,14 +76,21 @@ const conceptPageData = await client.get({
 
 // STAFF（オーナー・代表者）情報を取得
 
-const staffResponse = await client.get({
-  endpoint: "staff",
-  queries: {
-    limit: 1,
-    orders: "sortOrder",
-  },
-});
-const topStaff = staffResponse.contents[0];
+let topStaff: StaffItem | undefined;
+
+try {
+  const staffResponse = await client.get({
+    endpoint: "staff",
+    queries: {
+      limit: 1,
+      orders: "sortOrder",
+    },
+  });
+
+  topStaff = staffResponse.contents?.[0];
+} catch (error) {
+  console.warn("スタッフ情報を取得できませんでした。", error);
+}
 
 
 // pages APIから pageId が reservation のデータを取得

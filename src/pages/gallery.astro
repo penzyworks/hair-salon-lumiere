@@ -5,14 +5,21 @@ import Footer from '../components/Footer.astro';
 import { client } from "../library/microcms";
 
 // CMSからギャラリー一覧を取得（管理画面の並び順）
-const response = await client.get({
-  endpoint: "gallery",
-  queries: {
-    limit: 100,
-  },
-});
+let galleryList = [];
 
-const galleryList = response.contents;
+try {
+  const response = await client.get({
+    endpoint: "gallery",
+    queries: {
+      limit: 100,
+    },
+  });
+
+  galleryList = response.contents ?? [];
+} catch (error) {
+  console.warn("ギャラリー一覧を取得できませんでした。", error);
+}
+
 ---
 
 <!DOCTYPE html>

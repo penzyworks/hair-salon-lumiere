@@ -6,14 +6,21 @@ import { client } from '../library/microcms';
 import type { MenuItem } from '../library/microcms';
 
 // microCMSからメニュー一覧を取得（sortOrder順）
-const response = await client.get({
-  endpoint: 'menu',
-  queries: { 
-    limit: 100,
-    orders: "sortOrder", // ★ 数字の小さい順に取得
-  },
-});
-const menuList: MenuItem[] = response.contents;
+let menuList: MenuItem[] = [];
+
+try {
+  const response = await client.get({
+    endpoint: 'menu',
+    queries: {
+      limit: 100,
+      orders: "sortOrder",
+    },
+  });
+
+  menuList = response.contents ?? [];
+} catch (error) {
+  console.warn("メニュー一覧を取得できませんでした。", error);
+}
 
 // カテゴリ判定用の補助関数（大文字・小文字を無視してチェック）
 const checkCategory = (item: MenuItem, catName: string) => {
