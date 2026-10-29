@@ -347,7 +347,7 @@ if (daysInWeek.length > 0) {
             </p>
 
             <div class="staff-btn-wrap">
-              <a href={import.meta.env.BASE_URL + 'staff/'} class="staff-more-btn">
+              <a href={`${import.meta.env.BASE_URL.replace(/\/+$/, '')}/staff/`} class="staff-more-btn">
                 <span class="btn-text-en">VIEW MORE</span>
                 <span class="btn-text-ja">詳しいプロフィールを見る</span>
                 <span class="arrow">›</span>
