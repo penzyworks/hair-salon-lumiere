@@ -451,7 +451,7 @@ if (daysInWeek.length > 0) {
           </div>
 
           <div class="menu-btn-wrap">
-            <a href={import.meta.env.BASE_URL + 'menu/'} class="menu-more-btn">
+            <a href={`${import.meta.env.BASE_URL.replace(/\/+$/, '')}/menu/`} class="menu-more-btn">
               <span class="btn-text-en">VIEW MORE MENU</span>
               <span class="btn-text-ja">全メニュー・料金を見る</span>
               <span class="arrow">›</span>
