@@ -51,37 +51,34 @@ jobs:
         env:
           MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
           MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
-      - name: Test microCMS API connection
+      - name: Test microCMS HTTP request
         run: |
           node --input-type=module <<'NODE'
-          import dns from 'node:dns/promises';
-
-          const domain = process.env.MICROCMS_SERVICE_DOMAIN?.trim();
-          const host = `${domain}.microcms.io`;
-
-          console.log('SERVICE_DOMAIN_SET:', Boolean(domain));
-          console.log('DOMAIN_MATCHES_EXPECTED:', domain === 'beautysalon');
-          console.log('DOMAIN_CONTAINS_MICROCMS_SUFFIX:', domain?.includes('.microcms.io') ?? false);
-          console.log('DOMAIN_STARTS_WITH_HTTPS:', domain?.startsWith('https://') ?? false);
-          console.log('DOMAIN_CONTAINS_SLASH:', domain?.includes('/') ?? false);
-          console.log('DOMAIN_HAS_WHITESPACE:', /\s/.test(domain ?? ''));
-          console.log('HOST_FORMAT_OK:', /^[a-z0-9-]+\.microcms\.io$/i.test(host));
+          const url = `https://${process.env.MICROCMS_SERVICE_DOMAIN}.microcms.io/api/v1/news`;
 
           try {
-            const addresses = await dns.lookup(host);
-            console.log('DNS_LOOKUP: success');
-            console.log('ADDRESS_FAMILY:', addresses.family);
+            const response = await fetch(url, {
+              headers: {
+                'X-MICROCMS-API-KEY': process.env.MICROCMS_API_KEY
+              }
+            });
+
+            console.log('MICROCMS_HTTP_STATUS:', response.status);
+
+            if (!response.ok) {
+              const body = await response.text();
+              console.log('ERROR_RESPONSE:', body.slice(0, 300));
+              process.exitCode = 1;
+            } else {
+              const data = await response.json();
+              console.log('NEWS_API_REQUEST: success');
+              console.log('NEWS_CONTENT_COUNT:', data.contents?.length ?? 'unknown');
+            }
           } catch (error) {
-            console.log('DNS_LOOKUP: failed');
-            console.log('DNS_ERROR_CODE:', error.code);
+            console.log('HTTP_REQUEST_FAILED:', error.cause?.code ?? error.message);
             process.exitCode = 1;
           }
           NODE
-        env:
-          MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
-
-      - name: Build with Astro
-        run: npm run build
         env:
           MICROCMS_SERVICE_DOMAIN: ${{ secrets.MICROCMS_SERVICE_DOMAIN }}
           MICROCMS_API_KEY: ${{ secrets.MICROCMS_API_KEY }}
