@@ -419,14 +419,14 @@ if (daysInWeek.length > 0) {
         </div>
 
         <div class="gallery-btn-wrap">
-          <a href={import.meta.env.BASE_URL + 'gallery/'} class="gallery-more-btn">
-            <span class="btn-text-en">VIEW MORE</span>
-            <span class="btn-text-ja">スタイル一覧を見る</span>
-            <span class="arrow">›</span>
-          </a>
-        </div>
-      </div>
-    </section>
+  <a href={`${import.meta.env.BASE_URL.replace(/\/+$/, '')}/gallery/`} class="gallery-more-btn">
+    <span class="btn-text-en">VIEW MORE</span>
+    <span class="btn-text-ja">スタイル一覧を見る</span>
+    <span class="arrow">›</span>
+  </a>
+</div>
+</div>
+</section>
 
     <!-- 6. MENU -->
     <section id="menu" class="section menu-section fade-in">
