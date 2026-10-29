@@ -223,10 +223,10 @@ try {
 <body>
 
   <!-- 固定予約ボタン（右下） -->
-  <a href={import.meta.env.BASE_URL + '#reservation'} class="cta-reserve-btn">
-    <span class="btn-en">WEB RESERVATION</span>
-    <span class="btn-ja">ご予約はこちら</span>
-  </a>
+<a href={`${import.meta.env.BASE_URL.replace(/\/+$/, '')}/#reservation`} class="fixed-reserve-btn">
+  <span class="btn-en">WEB RESERVATION</span>
+  <span class="btn-ja">ご予約はこちら</span>
+</a>
 
   <!-- ヘッダー呼び出し（STAFF指定） -->
   <Header current="staff" />
