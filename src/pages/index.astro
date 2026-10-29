@@ -484,7 +484,7 @@ if (daysInWeek.length > 0) {
 
               return (
                 <article class="news-item">
-                  <a href={`/news/#news-${index + 1}`} class="news-item-link" style="display:flex; align-items:center; gap:24px; width:100%;">
+                  <a href={`${import.meta.env.BASE_URL.replace(/\/+$/, '')}/news/#news-${index + 1}`} class="news-item-link" style="display:flex; align-items:center; gap:24px; width:100%;">
                     <div class="news-thumb">
                       {item.thumbnail ? (
                         <img src={item.thumbnail.url} alt={item.title} />
