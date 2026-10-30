@@ -15,15 +15,13 @@ const commonData = await client.get({
 }).then(res => res.contents[0]).catch(() => null);
 
 const getLink = (anchor: string, path: string) => {
+  const homeUrl = import.meta.env.BASE_URL.replace(/\/+$/, '');
+
   if (isHome) {
     return `#${anchor}`;
   }
 
-  if (anchor === 'access' || anchor === 'reservation') {
-    return `${import.meta.env.BASE_URL}#${anchor}`;
-  }
-
-  return `${import.meta.env.BASE_URL.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+  return `${homeUrl}/#${anchor}`;
 };
 
 ---

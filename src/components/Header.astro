@@ -13,16 +13,14 @@ const {
 
 // トップページならセクションへのリンク、下層ページならページへのリンク
 
+// すべてのページからトップページの各セクションへリンク
 const getLink = (anchor: string, path: string) => {
   if (isHome) {
     return `#${anchor}`;
   }
 
-  if (anchor === 'access' || anchor === 'reservation') {
-    return `${import.meta.env.BASE_URL}#${anchor}`;
-  }
-
-  return `${import.meta.env.BASE_URL.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+  const homeUrl = import.meta.env.BASE_URL.replace(/\/+$/, '');
+  return `${homeUrl}/#${anchor}`;
 };
 
 ---
