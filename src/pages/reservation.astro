@@ -189,8 +189,22 @@ const reservationData = await client.get({
 
           <!-- お問い合わせフォーム本体 -->
           <form id="contactForm" class="contact-form">
-            <div style="margin-bottom: 20px;">
-              <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333;">お名前 <span style="color: #d9534f;">*</span></label>
+
+  <!-- スパム対策用 Honeypot -->
+  <div class="honeypot-field" aria-hidden="true">
+    <label for="website">ウェブサイト</label>
+    <input
+      type="text"
+      id="website"
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+    />
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: #333;">お名前 <span style="color: #d9534f;">*</span></label>
+
               <input type="text" id="name" name="name" required style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;" placeholder="例：山田 太郎">
             </div>
 
@@ -306,6 +320,7 @@ const reservationData = await client.get({
         formData.append('email', document.getElementById('email').value);
         formData.append('category', document.getElementById('category').value);
         formData.append('message', document.getElementById('message').value);
+        formData.append('website', document.getElementById('website').value);
 
         // GASへPOST送信
         fetch(GAS_API_URL, {
@@ -317,21 +332,35 @@ const reservationData = await client.get({
         })
         .then(response => response.json())
         .then(result => {
-          if (result.status === 'success') {
-            contactForm.style.display = 'none';
-            document.getElementById('formResponse').style.display = 'block';
-          } else {
-            alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
-            submitBtn.disabled = false;
-            submitBtn.innerText = "送信する";
-          }
-        })
-        .catch(error => {
-          console.error('送信エラー:', error);
-          alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
-          submitBtn.disabled = false;
-          submitBtn.innerText = "送信する";
-        });
+  if (result.status === 'success') {
+    contactForm.style.display = 'none';
+
+    const formResponse = document.getElementById('formResponse');
+    formResponse.style.display = 'block';
+
+    // 送信完了メッセージの位置までスクロール
+    setTimeout(() => {
+      const targetPosition =
+        formResponse.getBoundingClientRect().top + window.pageYOffset - 120;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    }, 100);
+
+  } else {
+    alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
+    submitBtn.disabled = false;
+    submitBtn.innerText = "送信する";
+  }
+})
+.catch(error => {
+  console.error('送信エラー:', error);
+  alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
+  submitBtn.disabled = false;
+  submitBtn.innerText = "送信する";
+});
       });
     }
   </script>

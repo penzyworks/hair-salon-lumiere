@@ -1996,3 +1996,14 @@ a {
   line-height: 1.6;
 }
 
+/* ==========================================
+   お問い合わせフォーム Honeypot（スパム対策）
+   ========================================== */
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
