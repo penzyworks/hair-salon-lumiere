@@ -23,6 +23,15 @@ const reservationData = await client.get({
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
   
+
+<!-- Cloudflare Turnstile -->
+<script
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+></script>
+
+
   <style>
     /* ==========================================
        RESERVATION & CONTACT ページ専用デザイン
@@ -233,6 +242,13 @@ const reservationData = await client.get({
               <textarea id="message" name="message" rows="6" required style="width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box;" placeholder="ご相談内容をご記入ください。"></textarea>
             </div>
 
+<!-- Cloudflare Turnstile 認証 -->
+<div
+  class="cf-turnstile"
+  data-sitekey="0x4AAAAAAFv8kvuKRGhcRR7a"
+  style="margin-bottom: 20px;"
+></div>
+
             <div style="text-align: center;">
               <button type="submit" id="submitBtn" style="background: #1a1a1a; color: #fff; border: none; padding: 16px 50px; font-size: 1rem; border-radius: 30px; cursor: pointer; transition: background 0.3s;">送信する</button>
             </div>
@@ -301,68 +317,99 @@ const reservationData = await client.get({
       });
     }
 
-    // お問い合わせフォーム送信処理（GAS doPost連携）
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyKnyTf0NFBRvCytPN_V052xDQveLEpOX_b3PwRGvtJ7SROyaZLyChakpSTITmCXvsT-g/exec";
+// お問い合わせフォーム送信処理（GAS doPost連携）
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyKnyTf0NFBRvCytPN_V052xDQveLEpOX_b3PwRGvtJ7SROyaZLyChakpSTITmCXvsT-g/exec";
 
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-      contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+const contactForm = document.getElementById('contactForm');
 
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerText = "送信中...";
+if (contactForm) {
+  contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
 
-        // フォームデータの作成
-        const formData = new URLSearchParams();
-        formData.append('name', document.getElementById('name').value);
-        formData.append('tel', document.getElementById('tel').value);
-        formData.append('email', document.getElementById('email').value);
-        formData.append('category', document.getElementById('category').value);
-        formData.append('message', document.getElementById('message').value);
-        formData.append('website', document.getElementById('website').value);
+    const submitBtn = document.getElementById('submitBtn');
 
-        // GASへPOST送信
-        fetch(GAS_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          body: formData.toString()
-        })
-        .then(response => response.json())
-        .then(result => {
-  if (result.status === 'success') {
-    contactForm.style.display = 'none';
+    // Turnstile認証トークンを取得
+    const turnstileToken =
+      document.querySelector('[name="cf-turnstile-response"]')?.value || '';
 
-    const formResponse = document.getElementById('formResponse');
-    formResponse.style.display = 'block';
-
-    // 送信完了メッセージの位置までスクロール
-    setTimeout(() => {
-      const targetPosition =
-        formResponse.getBoundingClientRect().top + window.pageYOffset - 120;
-
-      window.scrollTo({
-        top: targetPosition,
-        behavior: 'smooth'
-      });
-    }, 100);
-
-  } else {
-    alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
-    submitBtn.disabled = false;
-    submitBtn.innerText = "送信する";
-  }
-})
-.catch(error => {
-  console.error('送信エラー:', error);
-  alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
+if (!turnstileToken) {
+  alert('認証が完了していません。確認画面をお待ちいただくか、再度お試しください。');
   submitBtn.disabled = false;
   submitBtn.innerText = "送信する";
-});
-      });
-    }
+  return;
+}
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "送信中...";
+
+    // フォームデータの作成
+    const formData = new URLSearchParams();
+
+    formData.append('name', document.getElementById('name').value);
+    formData.append('tel', document.getElementById('tel').value);
+    formData.append('email', document.getElementById('email').value);
+    formData.append('category', document.getElementById('category').value);
+    formData.append('message', document.getElementById('message').value);
+    formData.append('website', document.getElementById('website').value);
+
+    // Turnstile認証トークンをGASへ送信
+    formData.append('cf-turnstile-response', turnstileToken);
+
+    // GASへPOST送信
+    fetch(GAS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: formData.toString()
+    })
+    .then(response => response.json())
+    .then(result => {
+      if (result.status === 'success') {
+        contactForm.style.display = 'none';
+
+        const formResponse = document.getElementById('formResponse');
+        formResponse.style.display = 'block';
+
+        // 送信完了メッセージの位置までスクロール
+        setTimeout(() => {
+          const targetPosition =
+            formResponse.getBoundingClientRect().top + window.pageYOffset - 120;
+
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+        }, 100);
+
+      } else {
+        alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
+
+        // 使用済みトークンをリセット
+        if (window.turnstile) {
+          window.turnstile.reset();
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = "送信する";
+      }
+    })
+    .catch(error => {
+      console.error('送信エラー:', error);
+
+      alert('送信中にエラーが発生しました。お電話にてお問い合わせください。');
+
+      // 使用済みトークンをリセット
+      if (window.turnstile) {
+        window.turnstile.reset();
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerText = "送信する";
+    });
+  });
+}
+
   </script>
 </body>
 </html>
