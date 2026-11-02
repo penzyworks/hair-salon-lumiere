@@ -116,6 +116,18 @@ const reservationData = await client.get({
         padding: 40px 0 50px;
       }
     }
+
+/* スパム対策用 Honeypot：画面外に配置 */
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+
   </style>
 </head>
 <body>
